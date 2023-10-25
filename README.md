@@ -8,14 +8,45 @@ In parallel to working towards the general learning objectives of the Advanced M
 - Implement and apply a recent machine learning method,
 - Evaluate and report the method performance.
 
-## Timeline - Overview
-* 06.11.2023 Deadline for your own project description xor choice of pre-defined project (any time earlier is possible and encouraged) 
-* 08.11.2023 Project Kick-Off (after the lectures)
-* 22.11.2023 Supervision meeting (mandatory)
-* 06.12.2023 Project sharing round (mandatory)
-* 08.01.2024 Project report hand-in (mandatory)
-* 23.-24.01.2024 Oral exams (includes your project)
+## Timeline - Underview
 
+06.11.2023 Last lecture + exercises
+(08.11.2023 Project Kick-Off (after the lectures))
+
+25.10.2023 Devise the plan
+- understand data individually
+|
+|
+|
+01.11.2023 Understand data together
+|
+|
+|
+08.11.2023 Models research meeting
+- training
+|
+|
+|
+**22.11.2023 Supervision meeting (mandatory)**
+25.11.2023 Finalise Model
+27.11.2023 Start Model Analysis
+|
+|
+|
+04.12.2023 Finishing Model Analysis
+**06.12.2023 Project sharing round - presentation (mandatory)**
+08.12.2023 Last changes before writing report
+**09.12.2023 Report writing kick-off**
+|
+|
+|
+**16.12.2023 Internal Deadline for Project Report**
+xxx
+xxx
+xxx
+08.01.2024 Project report hand-in (mandatory)
+
+**23.-24.01.2024 Oral exams (includes your project)**
   ## Problem Statement
 To reach our learning goals, your task as a group is to:
 
