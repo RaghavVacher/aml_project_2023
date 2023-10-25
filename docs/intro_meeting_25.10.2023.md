@@ -38,40 +38,42 @@ Creating/training a neural network that will predict brain responses to images (
 
 # Timeline
 
-06.11.2023 Last lecture + exercises
+06.11.2023 Last lecture + exercises  
 (08.11.2023 Project Kick-Off (after the lectures))
 
-25.10.2023 Devise the plan
-- understand data individually
-|
-|
-|
-01.11.2023 Understand data together
-|
-|
-|
-08.11.2023 Models research meeting
-- training
-|
-|
-|
-**22.11.2023 Supervision meeting (mandatory)**
-25.11.2023 Finalise Model
-27.11.2023 Start Model Analysis
-|
-|
-|
-04.12.2023 Finishing Model Analysis
-**06.12.2023 Project sharing round - presentation (mandatory)**
-08.12.2023 Last changes before writing report
-**09.12.2023 Report writing kick-off**
-|
-|
-|
-**16.12.2023 Internal Deadline for Project Report**
-xxx
-xxx
-xxx
-08.01.2024 Project report hand-in (mandatory)
+25.10.2023 Devise the plan  
+|  
+| understand data individually  
+|  
+|  
+|  
+01.11.2023 Understand data together  
+|  
+| initial models research   
+|  
+08.11.2023 Models research meeting  
+|  
+| training  
+|  
+|  
+|  
+**22.11.2023 Supervision meeting (mandatory)**  
+25.11.2023 Finalise Model  
+27.11.2023 Start Model Analysis  
+|  
+|  
+|  
+04.12.2023 Finishing Model Analysis  
+**06.12.2023 Project sharing round - presentation (mandatory)**  
+08.12.2023 Last changes before writing report  
+**09.12.2023 Report writing kick-off**  
+|  
+|  
+|  
+**16.12.2023 Internal Deadline for Project Report**  
+| xxx  
+| xxx  
+| xxx  
+08.01.2024 Project report hand-in (mandatory)  
 
 **23.-24.01.2024 Oral exams (includes your project)**
