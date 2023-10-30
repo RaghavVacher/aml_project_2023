@@ -16,6 +16,8 @@ Creating/training a neural network that will predict brain responses to images (
 	 - [ ] structure of data
 	 - [ ] visual analysis
 	 - [ ] strategy for preprocessing
+	 	- [ ] de-noising / PCA
+		- [ ] finding outliers
 	 - [ ] data specific libraries
 - [ ] Models research
 	- [ ] understanding voxel-wise encoder CNNs (VECNN)
