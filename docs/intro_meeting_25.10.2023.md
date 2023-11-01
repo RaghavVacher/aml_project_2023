@@ -11,18 +11,29 @@ Creating/training a neural network that will predict brain responses to images (
 ### To-do:
 - [x] Todo list
 - [x] Timeline
-- [ ] Understand data
-	 - [ ] look into existing documentation
-	 - [ ] structure of data
+- [x] Understand data
+	 - [x] look into existing documentation
+	 - [x] structure of data
 	 - [ ] visual analysis
+		 - [ ] see how to do the flattened image with ROIs - for later
 	 - [ ] strategy for preprocessing
-	 	- [ ] de-noising / PCA
-		- [ ] finding outliers
-	 - [ ] data specific libraries
+		 - [ ] de-noising / PCA
+		 - [ ] finding outliers
+		- [x]  data specific libraries
+			- [x] nilearn (datasets and plotting)
+			- [x] Image from PIL
+- [ ] **look at original paper** 
+	- [ ] the way they normalize data
+	- [ ] the way they project data onto universal brain
+- [ ] **algonauts submissions**
+	- [ ] Emily 1 huze
+	- [ ] Frederik 2 hosseinadeli
+	- [ ] Raghav 3 UARK-SUNY-Albany
+	- [ ] Alek 6 blobGPT
 - [ ] Models research
-	- [ ] understanding voxel-wise encoder CNNs (VECNN)
+	- [ ] understanding voxel-wise encoder CNNs (VoEC)
 	- [ ] take subset of data to test on models
-	- [ ] look into + experiment with VECNN variations:
+	- [ ] look into + experiment with VoEC variations:
 		- [ ] 1. initial pre-processing
 		- [ ] 2. test variation + regularisation and hyperparameters
 	- [ ] decide on architecture
@@ -53,8 +64,8 @@ Creating/training a neural network that will predict brain responses to images (
 |  
 | initial models research   
 |  
-08.11.2023 Models research meeting  
-|  
+11.11.2023 14:00 Models research meeting  
+13.11.2023 10:00 Extra models meeting
 | training  
 |  
 |  
