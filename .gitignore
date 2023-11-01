@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 # Data etc
 data/
+=======
+# Custom
+data/algonauts
+.obsidian
+>>>>>>> 02037c6a25c59f08cb416d65694dc21654993855
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
