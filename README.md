@@ -22,7 +22,7 @@ In parallel to working towards the general learning objectives of the Advanced M
 		- [x]  data specific libraries
 			- [x] nilearn (datasets and plotting)
 			- [x] Image from PIL
-- [ ] **look at original paper** 
+- [ ] **look at [original paper](https://www.nature.com/articles/s41593-021-00962-x)** 
 	- [ ] the way they normalize data
 	- [ ] the way they project data onto universal brain
 - [ ] **algonauts submissions**
