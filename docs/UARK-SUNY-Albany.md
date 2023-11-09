@@ -6,4 +6,4 @@
 - The final solution consists of an ensemble of multiple unique encoders.
 
 - Pretraining:
-    - ![Pre-Training Process](docs\ALBANY-pretraining .png)
+    - ![Pre-Training Process](ALBANY-pretraining.png)
