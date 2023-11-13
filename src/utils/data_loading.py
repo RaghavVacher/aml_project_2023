@@ -18,7 +18,7 @@ def load_images_from_folder(folder_path, start=None, end=None):
 def load(subject, index_start=None, index_end=None):
     path = '../../data/algonauts/subj0' + str(subject)
     data_lh = np.load(path + '/training_split/training_fmri/lh_training_fmri.npy')[index_start : index_end]
-    data_rh = np.load(path + '/training_split/training_fmri/lh_training_fmri.npy')[index_start : index_end]
+    data_rh = np.load(path + '/training_split/training_fmri/rh_training_fmri.npy')[index_start : index_end]
     folder_path = path+"/training_split/training_images/"
     image_data = load_images_from_folder(folder_path, index_start, index_end)
     return data_lh, data_rh, image_data
