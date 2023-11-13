@@ -11,5 +11,3 @@ def get_pretrained_regression_model(output_size):
     pretrained_model.fc = nn.Linear(in_features, output_size)
     
     return pretrained_model
-
-model = get_pretrained_regression_model(100)
