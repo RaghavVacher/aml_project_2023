@@ -8,6 +8,9 @@ In parallel to working towards the general learning objectives of the Advanced M
 - Implement and apply a recent machine learning method,
 - Evaluate and report the method performance.
 
+### Link to Google Drive
+https://drive.google.com/drive/u/1/folders/1r4ZxT6RB416Ts4IAPNL4KrleKJfJU3FC
+
 ### To-do:
 - [x] Todo list
 - [x] Timeline
