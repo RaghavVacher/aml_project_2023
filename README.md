@@ -33,6 +33,11 @@ https://drive.google.com/drive/u/1/folders/1r4ZxT6RB416Ts4IAPNL4KrleKJfJU3FC
 	- [x] Frederik 2 hosseinadeli
 	- [x] Raghav 3 UARK-SUNY-Albany
 	- [x] Alek 6 blobGPT
+- [x] project setup
+	- [x] decide on coding environment
+	- [x] create new venv
+	- [x] create requirements.txt
+	- [x] setup at all laptops 
 - [ ] Models research
 	- [ ] understanding voxel-wise encoder CNNs (VoEC)
 	- [ ] take subset of data to test on models
