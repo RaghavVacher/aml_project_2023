@@ -28,11 +28,11 @@ https://drive.google.com/drive/u/1/folders/1r4ZxT6RB416Ts4IAPNL4KrleKJfJU3FC
 - [ ] **look at [original paper](https://soeg.kb.dk/permalink/45KBDK_KGL/1f0go08/cdi_unpaywall_primary_10_1038_s41593_021_00962_x)** 
 	- [ ] the way they normalize data
 	- [ ] the way they project data onto universal brain
-- [ ] **algonauts submissions**
-	- [ ] Emily 1 huze
-	- [ ] Frederik 2 hosseinadeli
-	- [ ] Raghav 3 UARK-SUNY-Albany
-	- [ ] Alek 6 blobGPT
+- [x] **algonauts submissions**
+	- [x] Emily 1 huze
+	- [x] Frederik 2 hosseinadeli
+	- [x] Raghav 3 UARK-SUNY-Albany
+	- [x] Alek 6 blobGPT
 - [ ] Models research
 	- [ ] understanding voxel-wise encoder CNNs (VoEC)
 	- [ ] take subset of data to test on models
