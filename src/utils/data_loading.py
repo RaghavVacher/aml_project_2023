@@ -23,7 +23,7 @@ def load(subject, index_start=None, index_end=None):
     image_data = load_images_from_folder(folder_path, index_start, index_end)
     return data_lh, data_rh, image_data
 
-class ImaginaryDataset(Dataset):
+class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None):
         self.num_samples = len(images_list)
         self.transform = transform
