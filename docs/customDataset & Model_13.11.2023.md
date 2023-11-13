@@ -37,11 +37,15 @@ Returns a tuple containing the image and output data at the given index.
 
 Parameters
 idx: Index of the sample.
-get_pretrained_regression_model Function
-Description
-The get_pretrained_regression_model function retrieves a pre-trained ResNet18 model with a modified fully connected layer for regression tasks.
+```
 
-Parameters
-output_size: Desired size of the output layer.
-Returns
+# `get_pretrained_regression_model` Function
+
+## Description
+The `get_pretrained_regression_model` function retrieves a pre-trained ResNet18 model with a modified fully connected layer for regression tasks.
+
+### Parameters
+- `output_size`: Desired size of the output layer.
+
+### Returns
 Pre-trained ResNet18 model with a modified output layer for regression.
