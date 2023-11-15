@@ -14,6 +14,32 @@ def get_pretrained_regression_model(output_size):
 
 import torch
 
+class ResNet2HeadModel(nn.Module):
+    def __init__(self, output_size):
+        super(ResNet2HeadModel, self).__init__()
+        
+        # Load the pretrained ResNet18 model
+        self.pretrained_model = models.resnet18(weights='DEFAULT')
+        
+        # Remove the last fully connected layer
+        self.pretrained_model.fc = nn.Identity()
+        
+        # Add two new linear layers for regression with custom output size
+        self.fc1 = nn.Linear(self.pretrained_model.fc.in_features, output_size)
+        self.fc2 = nn.Linear(self.pretrained_model.fc.in_features, output_size)
+
+    def forward(self, x):
+        # Forward pass through the pretrained ResNet18 model
+        x = self.pretrained_model(x)
+        
+        # Forward pass through the first linear layer
+        output1 = self.fc1(x)
+        
+        # Forward pass through the second linear layer
+        output2 = self.fc2(x)
+        
+        return output1, output2
+
 class Trainer:
     def __init__(self):
         self.model = None
