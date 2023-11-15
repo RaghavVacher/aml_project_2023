@@ -12,6 +12,8 @@ def get_pretrained_regression_model(output_size):
     
     return pretrained_model
 
+import torch
+
 class Trainer:
     def __init__(self):
         self.model = None
@@ -19,13 +21,14 @@ class Trainer:
         self.loss_fn = None
         self.train_loader = None
         self.val_loader = None
+        self.history = {'train_loss': [], 'val_loss': []}
 
     def compile(self, model, optimizer, learning_rate, loss_fn):
         self.model = model
         self.optimizer = optimizer(self.model.parameters(), lr=learning_rate)
         self.loss_fn = loss_fn
 
-    def fit(self, num_epochs, train_loader, val_loader = None):
+    def fit(self, num_epochs, train_loader, val_loader=None):
         self.train_loader = train_loader
         self.val_loader = val_loader
 
@@ -41,10 +44,12 @@ class Trainer:
                 total_loss += loss.item()
 
             avg_loss = total_loss / len(self.train_loader)
+            self.history['train_loss'].append(avg_loss)
             print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
 
             if self.val_loader is not None:
                 val_loss = self.evaluate(self.val_loader, "Validation")
+                self.history['val_loss'].append(val_loss)
                 print(f"Validation Loss: {val_loss}")
 
     def evaluate(self, data_loader, mode="Test"):
@@ -59,3 +64,18 @@ class Trainer:
         avg_loss = total_loss / len(data_loader)
         print(f"{mode} Loss: {avg_loss}")
         return avg_loss
+
+    def save(self, filepath):
+        torch.save({
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'history': self.history
+        }, filepath)
+        print(f"Model and training history saved to {filepath}")
+
+    def load(self, filepath):
+        checkpoint = torch.load(filepath)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.history = checkpoint['history']
+        print(f"Model and training history loaded from {filepath}")
