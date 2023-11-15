@@ -11,7 +11,8 @@ def load_images_from_folder(folder_path, start=None, end=None):
     for filename in os.listdir(folder_path)[start:end]:
         img_path = os.path.join(folder_path, filename)
         img = Image.open(img_path)
-        img_array = np.array(img).transpose((2, 0, 1))
+        img_array = np.array(img)
+        # .transpose((2, 0, 1))
         images.append(img_array)
     return images
 

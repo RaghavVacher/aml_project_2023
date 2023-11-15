@@ -76,7 +76,6 @@ class Trainer:
             if self.val_loader is not None:
                 val_loss = self.evaluate(self.val_loader, "Validation")
                 self.history['val_loss'].append(val_loss)
-                print(f"Validation Loss: {val_loss}")
 
     def evaluate(self, data_loader, mode="Test"):
         self.model.eval()
