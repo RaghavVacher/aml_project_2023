@@ -12,8 +12,6 @@ def get_pretrained_regression_model(output_size):
     
     return pretrained_model
 
-import torch
-
 class ResNet2HeadModel(nn.Module):
     def __init__(self, output_size):
         super(ResNet2HeadModel, self).__init__()
