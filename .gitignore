@@ -2,6 +2,7 @@
 data/algonauts
 .obsidian
 aml_project/
+src/models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
