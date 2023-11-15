@@ -56,3 +56,9 @@ trainer.compile(model=my_model, optimizer=torch.optim.Adam, learning_rate=0.0001
 
 # Training the model for 5 epochs with the provided data loader
 trainer.fit(num_epochs=5, train_loader=data_loader)
+```
+
+### Things to add
+- history/metric/logging func
+- saving/checkpointing func
+- loading func
