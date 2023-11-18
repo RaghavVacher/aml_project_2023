@@ -20,7 +20,7 @@ class ResNet2HeadModel(nn.Module):
         self.pretrained_model = models.resnet18(weights='DEFAULT')
         
         # Remove the last fully connected layer
-        self.pretrained_model.fc = nn.Identity()
+        # self.pretrained_model.fc = nn.Identity()
         
         # Add two new linear layers for regression with custom output size
         self.fc1 = nn.Linear(self.pretrained_model.fc.in_features, output_size)
