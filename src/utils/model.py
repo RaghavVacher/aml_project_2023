@@ -18,21 +18,26 @@ class ResNet2HeadModel(nn.Module):
         
         # Load the pretrained ResNet18 model
         self.pretrained_model = models.resnet18(weights='DEFAULT')
+        # in_features = self.pretrained_model.avgpool.in_features
+        in_features = 512
+        self.pretrained_model = torch.nn.Sequential(*(list(self.pretrained_model.children())[:-1]))
         
         # Remove the last fully connected layer
         # self.pretrained_model.fc = nn.Identity()
         
         # Add two new linear layers for regression with custom output size
-        self.fc1 = nn.Linear(self.pretrained_model.fc.in_features, output_size)
-        self.fc2 = nn.Linear(self.pretrained_model.fc.in_features, output_size)
+        # self.Adj_layer = nn.Linear(1, 512)
+        self.fc1 = nn.Linear(in_features, output_size)
+        self.fc2 = nn.Linear(in_features, output_size)
 
     def forward(self, x):
         # Forward pass through the pretrained ResNet18 model
         x = self.pretrained_model(x)
-        
+        # x = self.Adj_layer(x)
+        x = torch.flatten(x, 1)
         # Forward pass through the first linear layer
         output1 = self.fc1(x)
-        
+    
         # Forward pass through the second linear layer
         output2 = self.fc2(x)
         
@@ -95,7 +100,7 @@ class Trainer:
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
-            for inputs, (targets_head1, targets_head2) in self.train_loader:
+            for (inputs, targets_head1, targets_head2) in self.train_loader:
                 self.optimizer.zero_grad()
                 outputs_head1, outputs_head2 = self.model(inputs)
                 loss_head1 = self.loss_fn(outputs_head1, targets_head1)
@@ -119,7 +124,7 @@ class Trainer:
         self.model.eval()
         total_loss = 0.0
         with torch.no_grad():
-            for inputs, (targets_head1, targets_head2) in data_loader:
+            for inputs, targets_head1, targets_head2 in data_loader:
                 outputs_head1, outputs_head2 = self.model(inputs)
                 loss_head1 = self.loss_fn(outputs_head1, targets_head1)
                 loss_head2 = self.loss_fn(outputs_head2, targets_head2)

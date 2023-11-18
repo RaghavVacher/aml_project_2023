@@ -27,8 +27,12 @@ def load_subject_data(subject, index_start=None, index_end=None):
 class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None):
         self.num_samples = len(images_list)
+        print('       \nInitialize CustomDataset \n--------')
+        print('Number of samples: ', self.num_samples)
         self.transform = transform
+        print('Transform: ', self.transform)
         self.PCA = PCA
+        print('PCA: ', self.PCA)
         self.data, self.output = self.load_data(images_list, outputs_list)
 
     def load_data(self, images_list, outputs_list):
@@ -43,10 +47,13 @@ class CustomDataset(Dataset):
 
             data.append((image, output))
             output_concat.append(output)
-
+        
         if self.PCA:
             self.PCA.fit(output_concat)
-
+            
+        print('\nData loaded\n-------')
+        print('Data: ', len(data), '* ', data[0])
+        print('Output_concat: ', len(output_concat), '*', len(output_concat[0]), ': ', output_concat[0])
         return data, output_concat
 
     def give_output(self):

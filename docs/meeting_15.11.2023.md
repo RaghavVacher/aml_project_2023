@@ -23,6 +23,7 @@ XXX Memory - a nono because too complicated
 
 ### Todos:
 - read up on CNN and PCA
+- set up HPC
 - read existing code and classes and understand it
 - connect COCO annotations to images
 - fix the Trainer and CustomDataset classes to double hemisphere approach
