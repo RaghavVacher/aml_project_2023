@@ -87,6 +87,47 @@ class Trainer:
         avg_loss = total_loss / len(data_loader)
         print(f"{mode} Loss: {avg_loss}")
         return avg_loss
+    
+    def fit_dual_head(self, num_epochs, train_loader, val_loader=None):
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+
+        for epoch in range(num_epochs):
+            self.model.train()
+            total_loss = 0.0
+            for inputs, (targets_head1, targets_head2) in self.train_loader:
+                self.optimizer.zero_grad()
+                outputs_head1, outputs_head2 = self.model(inputs)
+                loss_head1 = self.loss_fn(outputs_head1, targets_head1)
+                loss_head2 = self.loss_fn(outputs_head2, targets_head2)
+                total_loss += (loss_head1 + loss_head2).item()
+
+                # You can choose to backpropagate on each head separately or sum the losses and backpropagate once.
+                (loss_head1 + loss_head2).backward()
+
+                self.optimizer.step()
+
+            avg_loss = total_loss / len(self.train_loader)
+            self.history['train_loss'].append(avg_loss)
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
+
+            if self.val_loader is not None:
+                val_loss = self.evaluate_dual_head(self.val_loader, "Validation")
+                self.history['val_loss'].append(val_loss)
+
+    def evaluate_dual_head(self, data_loader, mode="Test"):
+        self.model.eval()
+        total_loss = 0.0
+        with torch.no_grad():
+            for inputs, (targets_head1, targets_head2) in data_loader:
+                outputs_head1, outputs_head2 = self.model(inputs)
+                loss_head1 = self.loss_fn(outputs_head1, targets_head1)
+                loss_head2 = self.loss_fn(outputs_head2, targets_head2)
+                total_loss += (loss_head1 + loss_head2).item()
+
+        avg_loss = total_loss / len(data_loader)
+        print(f"{mode} Loss: {avg_loss}")
+        return avg_loss
 
     def save(self, filepath):
         torch.save({
