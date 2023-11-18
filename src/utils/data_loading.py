@@ -39,7 +39,6 @@ class CustomDataset(Dataset):
             # Load image from the given list
             image = Image.fromarray(images_list[i])
 
-            # Load output array from the given list
             output = outputs_list[i]
 
             data.append((image, output))
