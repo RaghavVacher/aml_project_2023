@@ -1,4 +1,4 @@
-
+# Meeting 03 - 15.11.2023
 ### **Ideas:**
 - split hemispheres
 - subject ID

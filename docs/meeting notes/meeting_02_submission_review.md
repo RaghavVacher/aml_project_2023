@@ -1,4 +1,4 @@
-# Algonauts submissions review
+# Algonauts submissions review - 11.11.2023
 
 ### 1. Memory Encoding Model
 - simple implementation of memory (they used transformers, maybe we can do LSTM, RNN, GRNN)

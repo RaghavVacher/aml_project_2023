@@ -1,4 +1,4 @@
-# Intro meeting
+# Intro meeting - 25.10.2023
 
 ### Problem statement
 Creating/training a neural network that will predict brain responses to images (stimuli) while remaining bio-inspired regarding the hierarchy.
