@@ -26,7 +26,7 @@ XXX Memory - a nono because too complicated
 - set up HPC
 - read existing code and classes and understand it
 - connect COCO annotations to images
-- fix the Trainer and CustomDataset classes to double hemisphere approach
+- fix the Trainer and CustomDataset classes to double hemisphere approach (done - AG & RV)
 - look at embedding subject ID (Raghav's paper)
 - LR scheduler + early stopper
 - complete/look into training script
