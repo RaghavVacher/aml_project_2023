@@ -16,13 +16,21 @@ def load_images_from_folder(folder_path, start=None, end=None):
         images.append(img_array)
     return images
 
-def load_subject_data(subject, index_start=None, index_end=None):
+def load_subject_data(subject, index_start=None, index_end=None, return_dict=False):
     path = '../../data/algonauts/subj0' + str(subject)
     data_lh = np.load(path + '/training_split/training_fmri/lh_training_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_split/training_fmri/rh_training_fmri.npy')[index_start : index_end]
     folder_path = path+"/training_split/training_images/"
     image_data = load_images_from_folder(folder_path, index_start, index_end)
-    return data_lh, data_rh, image_data
+    
+    if return_dict:
+        subject_data = {'subject_id': subject,
+                        'data_lh': data_lh,
+                        'data_rh': data_rh,
+                        'image_data': image_data}
+        return subject_data
+    else:
+        return data_lh, data_rh, image_data
 
 class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None):
