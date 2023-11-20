@@ -22,17 +22,17 @@ XXX Memory - a nono because too complicated
 - ViT
 
 ### Todos:
-- read up on CNN and PCA
-- set up HPC
-- read existing code and classes and understand it
-- connect COCO annotations to images
-- fix the Trainer and CustomDataset classes to double hemisphere approach (done - AG & RV)
-- look at embedding subject ID (Raghav's paper)
-- LR scheduler + early stopper
-- complete/look into training script
-- look at PCA components number discussion in the submission papers (done - EK)
-- experiment with different PCA component vals (done - EK)
-- look into error calculation on inversed PCA brain activity (RV)
+- [ ] read up on CNN and PCA
+- [ ] set up HPC
+- [ ] read existing code and classes and understand it
+- [ ] connect COCO annotations to images
+- [x] fix the Trainer and CustomDataset classes to double hemisphere approach (done - AG & RV)
+- [ ] look at embedding subject ID (Raghav's paper)
+- [ ] LR scheduler + early stopper
+- [ ] complete/look into training script
+- [x] look at PCA components number discussion in the submission papers (done - EK)
+- [x] experiment with different PCA component vals (done - EK)
+- [ ] look into error calculation on inversed PCA brain activity (RV)
 
 ### Questions for Sami:
 - is it enough state of the art? the methods we found from other papers

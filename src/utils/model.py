@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from tqdm import tqdm
 
 def get_pretrained_regression_model(output_size):
     # Load the pretrained ResNet18 model
@@ -64,14 +65,17 @@ class Trainer:
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
-            for inputs, targets in self.train_loader:
-                self.optimizer.zero_grad()
-                outputs = self.model(inputs)
-                loss = self.loss_fn(outputs, targets)
-                loss.backward()
-                self.optimizer.step()
-                total_loss += loss.item()
+            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}, Function: {self.fit.__name__}") as pbar:
+                for inputs, targets in self.train_loader:
+                    self.optimizer.zero_grad()
+                    outputs = self.model(inputs)
+                    loss = self.loss_fn(outputs, targets)
+                    loss.backward()
+                    self.optimizer.step()
+                    total_loss += loss.item()
 
+                    # Update the progress bar
+                    pbar.update(1)
             avg_loss = total_loss / len(self.train_loader)
             self.history['train_loss'].append(avg_loss)
             print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
@@ -101,6 +105,7 @@ class Trainer:
             self.model.train()
             total_loss = 0.0
             for (inputs, targets_head1, targets_head2) in self.train_loader:
+                print('batch')
                 self.optimizer.zero_grad()
                 outputs_head1, outputs_head2 = self.model(inputs)
                 loss_head1 = self.loss_fn(outputs_head1, targets_head1)
