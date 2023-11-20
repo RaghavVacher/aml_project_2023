@@ -101,6 +101,7 @@ class Trainer:
             self.model.train()
             total_loss = 0.0
             for (inputs, targets_head1, targets_head2) in self.train_loader:
+                print('batch')
                 self.optimizer.zero_grad()
                 outputs_head1, outputs_head2 = self.model(inputs)
                 loss_head1 = self.loss_fn(outputs_head1, targets_head1)
