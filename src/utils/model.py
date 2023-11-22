@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 from tqdm import tqdm
+import torch.nn.functional as F
 
 def get_pretrained_regression_model(output_size):
     # Load the pretrained ResNet18 model
@@ -43,6 +44,78 @@ class ResNet2HeadModel(nn.Module):
         output2 = self.fc2(x)
         
         return output1, output2
+    
+class ResNet1HeadID(nn.Module):
+    def __init__(self, output_size):
+        super(ResNet1HeadID, self).__init__()
+        
+        # Load the pretrained ResNet18 model
+        self.pretrained_model = models.resnet18(weights='DEFAULT')
+        in_features = 512 # in_features for first layer after CNN
+
+        # Remove the last fully connected layer
+        self.pretrained_model = torch.nn.Sequential(*(list(self.pretrained_model.children())[:-1]))
+        
+        # Add shared layer
+        self.shared = nn.Linear(in_features, 256)
+
+        # Add subject-specific layers
+        self.sub1 = nn.Linear(in_features, 256)
+        self.sub2 = nn.Linear(in_features, 256)
+        self.sub3 = nn.Linear(in_features, 256)
+        self.sub4 = nn.Linear(in_features, 256)
+        self.sub5 = nn.Linear(in_features, 256)
+        self.sub6 = nn.Linear(in_features, 256)
+        self.sub7 = nn.Linear(in_features, 256)
+        self.sub8 = nn.Linear(in_features, 256)
+
+        # Combine shared and subject-specific layers
+        self.head = nn.Linear(256, output_size)
+
+    def forward(self, x):
+        # Extract image and subject ID from the input
+        if type(x) == tuple:
+            image, id = x
+        else:
+            image = x
+
+        # Forward pass through the pretrained ResNet18 model
+        features = self.pretrained_model(image)
+
+        # Flatten the features
+        flat_features = torch.flatten(features, 1)
+
+        # Forward pass through the shared layer
+        shared = self.shared(flat_features)
+
+        # Forward pass through the subject-specific layers
+        if id == 1:
+            subject = self.sub1(flat_features)
+        elif id == 2:
+            subject = self.sub2(flat_features)
+        elif id == 3:
+            output = self.sub3(flat_features)
+        elif id == 4:
+            subject = self.sub4(flat_features)
+        elif id == 5:
+            subject = self.sub5(flat_features)
+        elif id == 6:
+            subject = self.sub6(flat_features)
+        elif id == 7:
+            subject = self.sub7(flat_features)
+        elif id == 8:
+            subject = self.sub8(flat_features)
+
+        # Add the shared and subject-specific layers
+        if id:
+            combined = shared + subject
+        else:
+            combined = shared
+
+        # Forward pass through the first linear layer
+        output = self.head(combined)
+    
+        return output
 
 class Trainer:
     def __init__(self):
