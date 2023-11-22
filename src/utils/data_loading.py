@@ -23,6 +23,7 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
     data_rh = np.load(path + '/training_split/training_fmri/rh_training_fmri.npy')[index_start : index_end]
     folder_path = path+"/training_split/training_images/"
     image_data = load_images_from_folder(folder_path, index_start, index_end)
+    id_list = [subject for i in range(len(image_data))]
     
     if return_dict:
         subject_data = {'subject_id': subject,
@@ -31,10 +32,10 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
                         'image_data': image_data}
         return subject_data
     else:
-        return data_lh, data_rh, image_data
+        return data_lh, data_rh, image_data, id_list
 
 class CustomDataset(Dataset):
-    def __init__(self, images_list, outputs_list, transform=None, PCA=None):
+    def __init__(self, images_list, outputs_list, transform=None, PCA=None, id_list=None):
         self.num_samples = len(images_list)
         print('       \nInitialize CustomDataset \n--------')
         print('Number of samples: ', self.num_samples)
@@ -42,9 +43,10 @@ class CustomDataset(Dataset):
         print('Transform: ', self.transform)
         self.PCA = PCA
         print('PCA: ', self.PCA)
-        self.data, self.output = self.load_data(images_list, outputs_list)
+        self.id_list = id_list
+        self.data, self.output = self.load_data(images_list, outputs_list, id_list)
 
-    def load_data(self, images_list, outputs_list):
+    def load_data(self, images_list, outputs_list, id_list=None):
         data = []
         output_concat = []
 
@@ -53,8 +55,13 @@ class CustomDataset(Dataset):
             image = Image.fromarray(images_list[i])
 
             output = outputs_list[i]
-
-            data.append((image, output))
+           
+            if id_list:
+                id = id_list[i]
+                data.append(([image, id], output))
+            else:
+                data.append((image, output))
+                
             output_concat.append(output)
         
         if self.PCA:
@@ -78,11 +85,19 @@ class CustomDataset(Dataset):
         return self.num_samples
 
     def __getitem__(self, idx):
-        image, output = self.data[idx]
+        if self.id_list:
+            image = self.data[idx][0][0]
+            subject_id = self.data[idx][0][1]
+            output = self.data[idx][1]
+        else:
+            image, output = self.data[idx]
 
         if self.transform:
             image = self.transform(image)
         if self.PCA:
             output = self.PCA.transform(output.reshape(1, -1))
 
-        return image, torch.FloatTensor(output[0])
+        if self.id_list:
+            return (image, subject_id), torch.FloatTensor(output[0])
+        else:
+            return image, torch.FloatTensor(output[0])
