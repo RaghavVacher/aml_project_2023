@@ -50,6 +50,9 @@ if need to be more advanced:
 	- what is being learned in the network
 	- e.g. compare ROI activation in different intermediate layers
 	- correlation between layer response and regions --> is there a region that spiked in correlation scores for different layers?
+	- Do intermediate layers correlate with regions
+	- Visualise correlations between layer activations and ROI activations
+	- Do some layers 'define' specific regions?
 
 # Todos:
 
