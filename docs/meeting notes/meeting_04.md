@@ -7,4 +7,4 @@
 - [ ] LR scheduler + early stopper
 - [ ] complete/look into training script
 - [ ] look into error calculation on inversed PCA brain activity (RV)
-- [ ] write loop for choosing PCA n component
+- [x ] write loop for choosing PCA n component
