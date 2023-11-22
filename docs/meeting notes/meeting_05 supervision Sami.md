@@ -57,15 +57,22 @@ if need to be more advanced:
 # Todos:
 
 today:
-- [ ] new model structure: shared layer + subject specific layer
+- [x] new model structure: shared layer + subject specific layer
 	- as substitute for embedding subject ID
 - [ ] run PCA exploration elbow method for combined brainn for all subjects
 - [ ] look into error calculation on inversed PCA brain activity
 
 later:
+- [ ] look into different pretrained models (e.g. for ones that have been shown to be bio-inspired / good for brain activations etc. to make informed choice)
 - [ ] connect COCO annotations to images
 - [ ] set up HPC
 - [ ] LR scheduler + early stopper
 - [ ] complete/look into training script
 	- [x] single-head
 	- [ ] double-head
+
+
+For next time:
+
+- model woth shared and subject specific layers is built
+- dataloading funcs and CustomDataset Class is adjusted, but the output doesn*t fulfill the requirements for the DataLoader yet --> need to fix next time
