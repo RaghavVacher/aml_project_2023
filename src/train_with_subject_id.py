@@ -17,7 +17,6 @@ from sklearn.linear_model import LinearRegression
 from scipy.stats import pearsonr as corr
 from sklearn.decomposition import PCA
 import random
-from utils import sampler
 
 # Create concatenated lists including X samples * 8 subjects
 brain_concat = []
@@ -25,7 +24,7 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,2+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 100, include_subject_id=True)
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 200, include_subject_id=True)
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
