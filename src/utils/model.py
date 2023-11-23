@@ -149,6 +149,7 @@ class Trainer:
 
                     # Update the progress bar
                     pbar.update(1)
+
             avg_loss = total_loss / len(self.train_loader)
             self.history['train_loss'].append(avg_loss)
             print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
@@ -198,6 +199,7 @@ class Trainer:
                 val_loss = self.evaluate_dual_head(self.val_loader, "Validation")
                 self.history['val_loss'].append(val_loss)
 
+
     def evaluate_dual_head(self, data_loader, mode="Test"):
         self.model.eval()
         total_loss = 0.0
@@ -211,7 +213,46 @@ class Trainer:
         avg_loss = total_loss / len(data_loader)
         print(f"{mode} Loss: {avg_loss}")
         return avg_loss
+    
+    def fitID(self, num_epochs, train_loader, val_loader=None):
+        self.train_loader = train_loader
+        self.val_loader = val_loader
 
+        for epoch in range(num_epochs):
+            self.model.train()
+            total_loss = 0.0
+            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}, Function: {self.fit.__name__}") as pbar:
+                for images, subject_ids, targets in self.train_loader:
+                    self.optimizer.zero_grad()
+                    outputs = self.model((images, subject_ids))
+                    loss = self.loss_fn(outputs, targets)
+                    loss.backward()
+                    self.optimizer.step()
+                    total_loss += loss.item()
+
+                    # Update the progress bar
+                    pbar.update(1)
+            avg_loss = total_loss / len(self.train_loader)
+            self.history['train_loss'].append(avg_loss)
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
+
+            if self.val_loader is not None:
+                val_loss = self.evaluateID(self.val_loader, "Validation")
+                self.history['val_loss'].append(val_loss)
+
+    def evaluateID(self, data_loader, mode="Test"):
+        self.model.eval()
+        total_loss = 0.0
+        with torch.no_grad():
+            for images, ids, targets in data_loader:
+                outputs = self.model((images, ids))
+                loss = self.loss_fn(outputs, targets)
+                total_loss += loss.item()
+
+        avg_loss = total_loss / len(data_loader)
+        print(f"{mode} Loss: {avg_loss}")
+        return avg_loss
+    
     def save(self, filepath):
         torch.save({
             'model_state_dict': self.model.state_dict(),
