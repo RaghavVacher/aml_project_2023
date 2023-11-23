@@ -75,12 +75,12 @@ class ResNet1HeadID(nn.Module):
     def forward(self, x):
         # Extract image and subject ID from the input
         if type(x) == tuple:
-            image, id = x
+            images, ids = x
         else:
             image = x
 
         # Forward pass through the pretrained ResNet18 model
-        features = self.pretrained_model(image)
+        features = self.pretrained_model(images)
 
         # Flatten the features
         flat_features = torch.flatten(features, 1)
@@ -89,33 +89,28 @@ class ResNet1HeadID(nn.Module):
         shared = self.shared(flat_features)
 
         # Forward pass through the subject-specific layers
-        if id == 1:
-            subject = self.sub1(flat_features)
-        elif id == 2:
-            subject = self.sub2(flat_features)
-        elif id == 3:
-            output = self.sub3(flat_features)
-        elif id == 4:
-            subject = self.sub4(flat_features)
-        elif id == 5:
-            subject = self.sub5(flat_features)
-        elif id == 6:
-            subject = self.sub6(flat_features)
-        elif id == 7:
-            subject = self.sub7(flat_features)
-        elif id == 8:
-            subject = self.sub8(flat_features)
+        outputs = []
+        for i in range(len(ids)):
+            if ids[i] == 1:
+                subject = self.sub1(flat_features[i])
+            elif ids[i] == 2:
+                subject = self.sub2(flat_features[i])
+            elif ids[i] == 3:
+                subject = self.sub3(flat_features[i])
+            elif ids[i] == 4:
+                subject = self.sub4(flat_features[i])
+            elif ids[i] == 5:
+                subject = self.sub5(flat_features[i])
+            elif ids[i] == 6:
+                subject = self.sub6(flat_features[i])
+            elif ids[i] == 7:
+                subject = self.sub7(flat_features[i])
+            elif ids[i] == 8:
+                subject = self.sub8(flat_features[i])
+            output = self.head(subject)
+            outputs.append(output)
 
-        # Add the shared and subject-specific layers
-        if id:
-            combined = shared + subject
-        else:
-            combined = shared
-
-        # Forward pass through the first linear layer
-        output = self.head(combined)
-    
-        return output
+        return torch.stack(outputs)
 
 class Trainer:
     def __init__(self):
@@ -138,7 +133,7 @@ class Trainer:
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
-            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}, Function: {self.fit.__name__}") as pbar:
+            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}") as pbar:
                 for inputs, targets in self.train_loader:
                     self.optimizer.zero_grad()
                     outputs = self.model(inputs)
@@ -152,7 +147,7 @@ class Trainer:
 
             avg_loss = total_loss / len(self.train_loader)
             self.history['train_loss'].append(avg_loss)
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
+            print(f"> Training Loss: {avg_loss}")
 
             if self.val_loader is not None:
                 val_loss = self.evaluate(self.val_loader, "Validation")
@@ -168,7 +163,7 @@ class Trainer:
                 total_loss += loss.item()
 
         avg_loss = total_loss / len(data_loader)
-        print(f"{mode} Loss: {avg_loss}")
+        print(f"> {mode} Loss: {avg_loss}")
         return avg_loss
     
     def fit_dual_head(self, num_epochs, train_loader, val_loader=None):
@@ -221,7 +216,7 @@ class Trainer:
         for epoch in range(num_epochs):
             self.model.train()
             total_loss = 0.0
-            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}, Function: {self.fit.__name__}") as pbar:
+            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}") as pbar:
                 for images, subject_ids, targets in self.train_loader:
                     self.optimizer.zero_grad()
                     outputs = self.model((images, subject_ids))
