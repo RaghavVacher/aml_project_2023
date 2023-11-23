@@ -89,7 +89,7 @@ class ResNet1HeadID(nn.Module):
         shared = self.shared(flat_features)
 
         # Forward pass through the subject-specific layers
-        outputs = []
+        subjects = []
         for i in range(len(ids)):
             if ids[i] == 1:
                 subject = self.sub1(flat_features[i])
@@ -107,10 +107,15 @@ class ResNet1HeadID(nn.Module):
                 subject = self.sub7(flat_features[i])
             elif ids[i] == 8:
                 subject = self.sub8(flat_features[i])
-            output = self.head(subject)
-            outputs.append(output)
+            subjects.append(subject)
+        
+        # Add the shared and subject-specific layers
+        combined = shared + torch.stack(subjects)
 
-        return torch.stack(outputs)
+        # Forward pass through the first linear layer
+        output = self.head(combined)
+
+        return output
 
 class Trainer:
     def __init__(self):
