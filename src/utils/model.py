@@ -90,6 +90,7 @@ class ResNet1HeadID(nn.Module):
 
         # Forward pass through the subject-specific layers
         subjects = []
+        # Loop through the batch, one sample at a time
         for i in range(len(ids)):
             if ids[i] == 1:
                 subject = self.sub1(flat_features[i])
