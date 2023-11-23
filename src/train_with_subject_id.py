@@ -42,7 +42,7 @@ val_size = len(dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val_dataset, shuffle=True)
 
 # Initialize model, trainer, optimizer and loss function
