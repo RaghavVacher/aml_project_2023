@@ -16,28 +16,29 @@ def load_images_from_folder(folder_path, start=None, end=None):
         images.append(img_array)
     return images
 
-def load_subject_data(subject, index_start=None, index_end=None, return_dict=False):
-    current_dir = os.getcwd()
-    path = current_dir + '/data/algonauts/subj0' + str(subject)
+def load_subject_data(subject, index_start=None, index_end=None, return_dict=False, include_subject_id = False):
+    if(include_subject_id):
+        print('\n\n----------------\nLoading subject data with subject ID', str(subject) + '...')
+    else:
+        print('\n\n----------------\nLoading subject data...')
+    current_proj_dir = os.getcwd().split('aml_project_2023')[0] + 'aml_project_2023'
+    print('Current project directory: %s' % current_proj_dir)
+    path = current_proj_dir + '/data/algonauts/subj0' + str(subject)
     data_lh = np.load(path + '/training_split/training_fmri/lh_training_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_split/training_fmri/rh_training_fmri.npy')[index_start : index_end]
     folder_path = path+"/training_split/training_images/"
     image_data = load_images_from_folder(folder_path, index_start, index_end)
     id_list = [subject for i in range(len(image_data))]
     
-    if return_dict:
-        subject_data = {'subject_id': subject,
-                        'data_lh': data_lh,
-                        'data_rh': data_rh,
-                        'image_data': image_data}
-        return subject_data
-    else:
+    if include_subject_id:
         return data_lh, data_rh, image_data, id_list
+    else:
+        return data_lh, data_rh, image_data
 
 class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None, id_list=None):
         self.num_samples = len(images_list)
-        print('       \nInitialize CustomDataset \n--------')
+        print('\n----------------\nInitialize CustomDataset\n')
         print('Number of samples: ', self.num_samples)
         self.transform = transform
         print('Transform: ', self.transform)
@@ -67,10 +68,10 @@ class CustomDataset(Dataset):
         if self.PCA:
             self.PCA.fit(output_concat)
             
-        print('\nData loaded\n-------')
+        print('-------\nData loaded\n')
         print('Data: ', len(data), '* ', data[0])
         print('Output_concat: ', len(output_concat), '*', len(output_concat[0]), ': ', output_concat[0])
-        return data, output_concat
+        return data, outputs_list
 
     def give_output(self):
         return self.output
@@ -86,18 +87,21 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.id_list:
-            image = self.data[idx][0][0]
-            subject_id = self.data[idx][0][1]
-            output = self.data[idx][1]
+            (image, subject_id), output = self.data[idx]
         else:
             image, output = self.data[idx]
 
         if self.transform:
             image = self.transform(image)
+
         if self.PCA:
             output = self.PCA.transform(output.reshape(1, -1))
+        else:
+            output = output.reshape(1, -1)
+
+        ### Subject ID could be transformed, too?
 
         if self.id_list:
-            return (image, subject_id), torch.FloatTensor(output[0])
+            return image, subject_id, torch.FloatTensor(output[0])
         else:
             return image, torch.FloatTensor(output[0])
