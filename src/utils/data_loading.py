@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset, DataLoader, Sampler
+from torch.utils.data import Dataset, DataLoader, Sampler, Subset
 from sklearn.decomposition import PCA 
 from torchvision import transforms
 import numpy as np
@@ -105,6 +105,12 @@ class CustomDataset(Dataset):
             return image, subject_id, torch.FloatTensor(output[0])
         else:
             return image, torch.FloatTensor(output[0])
+        
+# Custom subset class to preserve .id_list attribute when splitting into train and val
+class CustomSubset(Subset):
+    def __init__(self, dataset, indices, id_list):
+        super(CustomSubset, self).__init__(dataset, indices)
+        self.id_list = id_list
         
 class SubjectSampler(Sampler):
     def __init__(self, dataset):
