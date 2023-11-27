@@ -24,7 +24,7 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,2+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 200, include_subject_id=True)
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 100, include_subject_id=True)
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
@@ -42,8 +42,10 @@ val_size = len(dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
-val_loader = torch.utils.data.DataLoader(val_dataset, shuffle=True)
+train_sampler = data_loading.SubjectSampler(train_dataset)
+val_sampler = data_loading.SubjectSampler(val_dataset)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, sampler=train_sampler)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=16, sampler=val_sampler)
 
 # Initialize model, trainer, optimizer and loss function
 reg_model = model.ResNet1HeadID(100)

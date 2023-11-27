@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, Sampler
 from sklearn.decomposition import PCA 
 from torchvision import transforms
 import numpy as np
@@ -105,3 +105,18 @@ class CustomDataset(Dataset):
             return image, subject_id, torch.FloatTensor(output[0])
         else:
             return image, torch.FloatTensor(output[0])
+        
+class SubjectSampler(Sampler):
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.indices = list(range(len(dataset)))
+        self.num_samples = len(dataset)
+
+    def __iter__(self):
+        np.random.shuffle(self.indices)  # ensures epochs do not have the same order
+        for subject_id in set(self.dataset.id_list):
+            subject_indices = [i for i in self.indices if self.dataset.id_list[i] == subject_id]
+            yield from subject_indices
+
+    def __len__(self):
+        return self.num_samples
