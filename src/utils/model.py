@@ -235,7 +235,7 @@ class Trainer:
                     pbar.update(1)
             avg_loss = total_loss / len(self.train_loader)
             self.history['train_loss'].append(avg_loss)
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
+            print(f"Training Loss: {avg_loss}")
 
             if self.val_loader is not None:
                 val_loss = self.evaluateID(self.val_loader, "Validation")
