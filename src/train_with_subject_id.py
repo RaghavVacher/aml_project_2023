@@ -39,7 +39,9 @@ print('Shape of 3rd element:', dataset[0][2].shape, '\n\n')
 # Create a train and validation subset of variable dataset with torch
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
-train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+# Use the CustomSubset class for the train and validation subsets
+train_dataset = data_loading.CustomSubset(dataset, range(0, train_size), ids_concat[:train_size])
+val_dataset = data_loading.CustomSubset(dataset, range(train_size, len(dataset)), ids_concat[train_size:])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
 train_sampler = data_loading.SubjectSampler(train_dataset)
@@ -52,6 +54,6 @@ reg_model = model.ResNet1HeadID(100)
 trainer = model.Trainer()
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
-trainer.compile(reg_model, optimizer, learning_rate=0.0001, loss_fn=loss)
+trainer.compile(reg_model, optimizer, learning_rate=0.1, loss_fn=loss)
 
-trainer.fitID(num_epochs = 3, train_loader=train_loader, val_loader=val_loader)
+trainer.fitID(num_epochs = 2, train_loader=train_loader, val_loader=val_loader)
