@@ -74,7 +74,7 @@ class ResNet1HeadID(nn.Module):
 
     def forward(self, x):
         # Extract image and subject ID from the input
-        if type(x) == tuple:
+        if isinstance(x, tuple):
             images, ids = x
         else:
             image = x
