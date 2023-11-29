@@ -77,7 +77,7 @@ class ResNet1HeadID(nn.Module):
         if isinstance(x, tuple):
             images, ids = x
         else:
-            image = x
+            images = x
 
         # Forward pass through the pretrained ResNet18 model
         features = self.pretrained_model(images)
