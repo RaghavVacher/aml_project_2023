@@ -23,8 +23,8 @@ brain_concat = []
 images_concat = []
 ids_concat = []
 
-for subj in range(1,2+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 100, include_subject_id=True)
+for subj in range(1,8+1):
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, None, None, include_subject_id=True)
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
@@ -54,6 +54,6 @@ reg_model = model.ResNet1HeadID(100)
 trainer = model.Trainer()
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
-trainer.compile(reg_model, optimizer, learning_rate=0.1, loss_fn=loss)
+trainer.compile(reg_model, optimizer, learning_rate=0.0001, loss_fn=loss)
 
 trainer.fitID(num_epochs = 2, train_loader=train_loader, val_loader=val_loader)
