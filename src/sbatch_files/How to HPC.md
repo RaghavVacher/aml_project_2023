@@ -16,6 +16,7 @@ Connecting for the first time takes a while.
 
 - Create py script to train the model
 - create an sbatch file using the template
-- upload the files to the hpc using: scp <path_to_sbatch_file.sbatch> itu_user@hpc.itu.dk:~/example.txt
+- upload the files to the hpc using: scp <path_to_sbatch_file.sbatch> itu_user@hpc.itu.dk:~/example.txt (you may not be connected while you do this)
+- create connection
 - submit by using this command: sbatch <filename.sbatch> 
 - monitor using this command: squeue -u your_username
