@@ -8,6 +8,7 @@ data/
 .DS_Store
 data/.DS_Store
 hpc/
+hpc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
