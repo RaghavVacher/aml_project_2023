@@ -3,6 +3,7 @@ data/algonauts
 .obsidian
 aml_project/
 src/models/
+models/
 data/
 .DS_Store
 data/.DS_Store
