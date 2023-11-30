@@ -44,7 +44,51 @@ class ResNet2HeadModel(nn.Module):
         output2 = self.fc2(x)
         
         return output1, output2
-    
+
+class LinearSequentialModel(nn.Module):
+    def __init__(self, input_size=512, hidden_size=256):
+        super(LinearSequentialModel, self).__init__()
+
+        # Sequential model
+        self.sequntial_model = nn.Sequential(
+            # Block 1
+            nn.Linear(input_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.BatchNorm1d(hidden_size),
+            nn.ReLU(),
+
+            # Block 2
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.BatchNorm1d(hidden_size),
+            nn.ReLU(),
+
+            # Block 3
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.BatchNorm1d(hidden_size),
+            nn.ReLU(),
+
+            # Block 4
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size),
+            nn.BatchNorm1d(hidden_size),
+            nn.ReLU(),
+
+            # dropout
+            nn.Dropout(0.25)
+        )
+
+    def forward(self, x):
+        # Forward pass through the sequential model
+        output = self.sequntial_model(x)
+
+        return output
+
 class ResNet1HeadID(nn.Module):
     def __init__(self, output_size):
         super(ResNet1HeadID, self).__init__()
@@ -57,17 +101,17 @@ class ResNet1HeadID(nn.Module):
         self.pretrained_model = torch.nn.Sequential(*(list(self.pretrained_model.children())[:-1]))
         
         # Add shared layer
-        self.shared = nn.Linear(in_features, 256)
+        self.shared = LinearSequentialModel(input_size=in_features, hidden_size=256)
 
         # Add subject-specific layers
-        self.sub1 = nn.Linear(in_features, 256)
-        self.sub2 = nn.Linear(in_features, 256)
-        self.sub3 = nn.Linear(in_features, 256)
-        self.sub4 = nn.Linear(in_features, 256)
-        self.sub5 = nn.Linear(in_features, 256)
-        self.sub6 = nn.Linear(in_features, 256)
-        self.sub7 = nn.Linear(in_features, 256)
-        self.sub8 = nn.Linear(in_features, 256)
+        self.sub1 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub2 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub3 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub4 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub5 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub6 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub7 = LinearSequentialModel(input_size=in_features, hidden_size=256)
+        self.sub8 = LinearSequentialModel(input_size=in_features, hidden_size=256)
 
         # Combine shared and subject-specific layers
         self.head = nn.Linear(256, output_size)
@@ -88,11 +132,7 @@ class ResNet1HeadID(nn.Module):
         # Forward pass through the shared layer
         shared = self.shared(flat_features)
 
-        # Forward pass through the subject-specific layers
-        '''
-            ids are optional to execute forward. loop needs ids to complete forward pass. Needs some clarity
-        '''
-
+        # Forward pass through the subject-specific layers if subject ID is given
         if ids != None:
             if ids[0] == 1:
                 subject = self.sub1(flat_features)
@@ -111,8 +151,8 @@ class ResNet1HeadID(nn.Module):
             elif ids[0] == 8:
                 subject = self.sub8(flat_features)
 
-            # Add the shared and subject-specific layers
-            combined = shared + subject
+            # Average the shared and subject-specific layers
+            combined = (shared + subject) / 2
         
         else:
             combined = shared
