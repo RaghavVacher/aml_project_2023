@@ -122,6 +122,7 @@ class ResNet1HeadID(nn.Module):
             images, ids = x
         else:
             images = x
+            ids = None
 
         # Forward pass through the pretrained ResNet18 model
         features = self.pretrained_model(images)
