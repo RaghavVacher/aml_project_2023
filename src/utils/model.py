@@ -89,33 +89,34 @@ class ResNet1HeadID(nn.Module):
         shared = self.shared(flat_features)
 
         # Forward pass through the subject-specific layers
-        subjects = []
-        # Loop through the batch, one sample at a time
         '''
             ids are optional to execute forward. loop needs ids to complete forward pass. Needs some clarity
         '''
-        for i in range(len(ids)):
-            if ids[i] == 1:
-                subject = self.sub1(flat_features[i])
-            elif ids[i] == 2:
-                subject = self.sub2(flat_features[i])
-            elif ids[i] == 3:
-                subject = self.sub3(flat_features[i])
-            elif ids[i] == 4:
-                subject = self.sub4(flat_features[i])
-            elif ids[i] == 5:
-                subject = self.sub5(flat_features[i])
-            elif ids[i] == 6:
-                subject = self.sub6(flat_features[i])
-            elif ids[i] == 7:
-                subject = self.sub7(flat_features[i])
-            elif ids[i] == 8:
-                subject = self.sub8(flat_features[i])
-            subjects.append(subject)
-        
-        # Add the shared and subject-specific layers
-        combined = shared + torch.stack(subjects)
 
+        if ids != None:
+            if ids[0] == 1:
+                subject = self.sub1(flat_features)
+            elif ids[0] == 2:
+                subject = self.sub2(flat_features)
+            elif ids[0] == 3:
+                subject = self.sub3(flat_features)
+            elif ids[0] == 4:
+                subject = self.sub4(flat_features)
+            elif ids[0] == 5:
+                subject = self.sub5(flat_features)
+            elif ids[0] == 6:
+                subject = self.sub6(flat_features)
+            elif ids[0] == 7:
+                subject = self.sub7(flat_features)
+            elif ids[0] == 8:
+                subject = self.sub8(flat_features)
+
+            # Add the shared and subject-specific layers
+            combined = shared + subject
+        
+        else:
+            combined = shared
+        
         # Forward pass through the first linear layer
         output = self.head(combined)
 
