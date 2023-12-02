@@ -26,13 +26,12 @@ import random
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters
-n_components = 10 # PCA components
-num_epochs = 2 # Number of epochs to train
+n_components = 100 # PCA components
+num_epochs = 10 # Number of epochs to train
+n_subjects = 8 # Number of subjects to train on
 batch_size = 16 # Batch size
 learning_rate = 0.0001 # Learning rate
 feature_extractor = models.resnet18(weights='DEFAULT') # CNN to use for feature extraction
-feature_extractor.to(device) # Move CNN to GPU if available
-
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 
@@ -41,8 +40,12 @@ brain_concat = []
 images_concat = []
 ids_concat = []
 
-for subj in range(1,2):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 100, include_subject_id=True)
+for subj in range(1,n_subjects+1):
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 20, include_subject_id=True)
+    ### TODO
+    lh = [fmri[:18978] for fmri in lh]
+    rh = [fmri[:20220] for fmri in rh]
+    
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
@@ -55,24 +58,25 @@ print('Type of 2nd element:', type(dataset[0][1]))
 print('Shape of 3rd element:', dataset[0][2].shape, '\n\n')
 
 # Create a train and validation subset of variable dataset with torch
-train_size = int(len(dataset))
-# val_size = len(dataset) - train_size
+train_size = int(0.89 * len(dataset))
+val_size = len(dataset) - train_size
 
 # Use the CustomSubset class for the train and validation subsets
 train_dataset = data_loading.CustomSubset(dataset, range(0, train_size), ids_concat[:train_size])
-# val_dataset = data_loading.CustomSubset(dataset, range(train_size, len(dataset)), ids_concat[train_size:])
+val_dataset = data_loading.CustomSubset(dataset, range(train_size, len(dataset)), ids_concat[train_size:])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
 train_sampler = data_loading.SubjectSampler(train_dataset)
-# val_sampler = data_loading.SubjectSampler(val_dataset)
+val_sampler = data_loading.SubjectSampler(val_dataset)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler)
-# val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, sampler=val_sampler)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, sampler=val_sampler)
 
-# Initialize model, trainer, optimizer and loss function
+# Initialize model and trainer
 reg_model = model.ResNet1HeadID(n_components, feature_extractor)
+reg_model.to(device)
 trainer = model.Trainer()
 trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
 
-trainer.fitID(num_epochs = num_epochs, train_loader=train_loader)
-
+# Train model and save
+trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader)
 trainer.save('trained_model.pt')
