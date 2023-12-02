@@ -5,6 +5,8 @@ from tqdm import tqdm
 import torch.nn.functional as F
 import os
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 def get_pretrained_regression_model(output_size):
     # Load the pretrained ResNet18 model
     # pretrained_model = models.resnet18(weights='DEFAULT')
@@ -271,6 +273,9 @@ class Trainer:
             total_loss = 0.0
             with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}") as pbar:
                 for images, subject_ids, targets in self.train_loader:
+                    images = images.to(device)
+                    subject_ids = subject_ids.to(device)
+                    targets = targets.to(device)
                     self.optimizer.zero_grad()
                     outputs = self.model((images, subject_ids))
                     loss = self.loss_fn(outputs, targets)

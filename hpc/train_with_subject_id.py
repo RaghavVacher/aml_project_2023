@@ -27,13 +27,13 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,8+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, None, None, include_subject_id=True)
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, None, 100, include_subject_id=True)
+    ### TODO
+    lh = [fmri[:18978] for fmri in lh]
+    rh = [fmri[:20220] for fmri in rh]
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
-
-lh = [fmri[:18978] for fmri in lh]
-rh = [fmri[:20220] for fmri in rh]
 
 # Create dataset with concatenated hemispheres
 dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms.ToTensor(), PCA = PCA(n_components = 100))
@@ -68,7 +68,7 @@ optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 trainer.compile(reg_model, optimizer, learning_rate=0.0001, loss_fn=loss)
 
-trainer.fitID(num_epochs = 10, train_loader=train_loader)
+trainer.fitID(num_epochs = 1, train_loader=train_loader)
 # create string with current date and time
 
 trainer.save('trained_model.py')
