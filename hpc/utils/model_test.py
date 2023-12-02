@@ -167,7 +167,7 @@ class ResNet1HeadID(nn.Module):
         else:
             combined = shared
         
-        # Forward pass through the first linear layer
+        # Forward pass through the final linear layer
         output = self.head(combined)
 
         return output
