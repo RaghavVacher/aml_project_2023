@@ -32,7 +32,7 @@ n_subjects = 8 # Number of subjects to train on
 num_samples = 100 # Number of samples per subject
 batch_size = 16 # Batch size
 learning_rate = 0.0001 # Learning rate
-feature_extractor = models.resnet18(weights='DEFAULT') # CNN to use for feature extraction
+feature_extractor = torch.hub.load('utils', 'resnet18', source='local') # CNN to use for feature extraction
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 

@@ -98,7 +98,7 @@ class ResNet1HeadID(nn.Module):
         
         if feature_extractor is None:
             # Load the pretrained ResNet18 model
-            self.feature_extractor = models.resnet18(weights='DEFAULT')
+            self.feature_extractor = torch.hub.load('utils', 'resnet18', source='local')
         else:
             # Load specified model
             self.feature_extractor = feature_extractor
