@@ -22,12 +22,16 @@ from scipy.stats import pearsonr as corr
 from sklearn.decomposition import PCA
 import random
 
+# Check if GPU is available and if not, use CPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 # Parameters
 n_components = 10 # PCA components
 num_epochs = 2 # Number of epochs to train
 batch_size = 16 # Batch size
 learning_rate = 0.0001 # Learning rate
 feature_extractor = models.resnet18(weights='DEFAULT') # CNN to use for feature extraction
+feature_extractor.to(device) # Move CNN to GPU if available
 
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
