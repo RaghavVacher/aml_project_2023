@@ -26,6 +26,7 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
     path = current_proj_dir + '/data/algonauts/subj0' + str(subject)
     data_lh = np.load(path + '/training_split/training_fmri/lh_training_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_split/training_fmri/rh_training_fmri.npy')[index_start : index_end]
+
     folder_path = path+"/training_split/training_images/"
     image_data = load_images_from_folder(folder_path, index_start, index_end)
     id_list = [subject for i in range(len(image_data))]
@@ -66,6 +67,12 @@ class CustomDataset(Dataset):
             output_concat.append(output)
         
         if self.PCA:
+            # # Find the maximum length of any list in data
+            # max_length = max(len(lst) for lst in output_concat)
+            # # Pad each list with zeros to ensure equal length
+            # padded_output = [np.concatenate((lst, [0]*(max_length - len(lst)))) for lst in output_concat]
+            for i in range(self.num_samples):
+                print(len(output_concat[i]))
             self.PCA.fit(output_concat)
             
         print('-------\nData loaded\n')

@@ -24,7 +24,11 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,8+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, None, None, include_subject_id=True)
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 20, include_subject_id=True)
+    ### TODO
+    lh = [fmri[:18978] for fmri in lh]
+    rh = [fmri[:20220] for fmri in rh]
+    
     brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
@@ -37,7 +41,7 @@ print('Type of 2nd element:', type(dataset[0][1]))
 print('Shape of 3rd element:', dataset[0][2].shape, '\n\n')
 
 # Create a train and validation subset of variable dataset with torch
-train_size = int(0.8 * len(dataset))
+train_size = int(0.89 * len(dataset))
 val_size = len(dataset) - train_size
 # Use the CustomSubset class for the train and validation subsets
 train_dataset = data_loading.CustomSubset(dataset, range(0, train_size), ids_concat[:train_size])
@@ -56,4 +60,5 @@ optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 trainer.compile(reg_model, optimizer, learning_rate=0.0001, loss_fn=loss)
 
-trainer.fitID(num_epochs = 2, train_loader=train_loader, val_loader=val_loader)
+trainer.fitID(num_epochs = 1, train_loader=train_loader, val_loader=val_loader)
+trainer.save('train_02-12-2023.pt')
