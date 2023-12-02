@@ -29,6 +29,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 n_components = 100 # PCA components
 num_epochs = 10 # Number of epochs to train
 n_subjects = 8 # Number of subjects to train on
+num_samples = 100 # Number of samples per subject
 batch_size = 16 # Batch size
 learning_rate = 0.0001 # Learning rate
 feature_extractor = models.resnet18(weights='DEFAULT') # CNN to use for feature extraction
@@ -41,7 +42,7 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,n_subjects+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, 20, include_subject_id=True)
+    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
     ### TODO
     lh = [fmri[:18978] for fmri in lh]
     rh = [fmri[:20220] for fmri in rh]
