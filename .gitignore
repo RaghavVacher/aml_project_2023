@@ -10,6 +10,7 @@ data/.DS_Store
 *.pt
 hpc/
 hpc
+aml_venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
