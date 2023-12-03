@@ -179,6 +179,7 @@ class Trainer:
         self.loss_fn = None
         self.train_loader = None
         self.val_loader = None
+        self.source = None
         self.history = {'train_loss': [], 'val_loss': []}
 
     def compile(self, model, optimizer, learning_rate, loss_fn):
@@ -319,8 +320,11 @@ class Trainer:
         }, filepath)
         print(f"Model and training history saved to {filepath}")
 
-    def load(self, filepath):
-        checkpoint = torch.load(filepath)
+    def load(self, filepath, source):
+        if source == "cpu":
+            checkpoint = torch.load(filepath, map_location=torch.device('cpu'))
+        else:
+            checkpoint = torch.load(filepath)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.history = checkpoint['history']
