@@ -303,6 +303,8 @@ class Trainer:
         total_loss = 0.0
         with torch.no_grad():
             for images, ids, targets in data_loader:
+                images = images.to(device)
+                ids = ids.to(device)
                 outputs = self.model((images, ids))
                 loss = self.loss_fn(outputs, targets)
                 total_loss += loss.item()

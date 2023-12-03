@@ -3,13 +3,14 @@ import torch.nn as nn
 import torchvision.models as models
 from tqdm import tqdm
 import torch.nn.functional as F
+import os
 
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def get_pretrained_regression_model(output_size):
     # Load the pretrained ResNet18 model
-    pretrained_model = models.resnet18(weights='DEFAULT')
+    pretrained_model = torch.hub.load('utils', 'resnet18', source='local')
     
     # Modify the last fully connected layer for regression with custom output size
     in_features = pretrained_model.fc.in_features
@@ -98,7 +99,7 @@ class ResNet1HeadID(nn.Module):
         
         if feature_extractor is None:
             # Load the pretrained ResNet18 model
-            self.feature_extractor = models.resnet18(weights='DEFAULT')
+            self.feature_extractor = torch.hub.load('utils', 'resnet18', source='local')
         else:
             # Load specified model
             self.feature_extractor = feature_extractor
@@ -303,7 +304,14 @@ class Trainer:
         total_loss = 0.0
         with torch.no_grad():
             for images, ids, targets in data_loader:
+                # Move the data to the GPU
+                images = images.to(device)
+                ids = ids.to(device)
+                targets = targets.to(device) 
+
                 outputs = self.model((images, ids))
+                print('outputs device:', outputs.device)
+                print('targets device:', targets.device)
                 loss = self.loss_fn(outputs, targets)
                 total_loss += loss.item()
 
