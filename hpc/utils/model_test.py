@@ -4,6 +4,7 @@ import torchvision.models as models
 from tqdm import tqdm
 import torch.nn.functional as F
 import os
+import sys
 
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -311,8 +312,6 @@ class Trainer:
                 targets = targets.to(device) 
 
                 outputs = self.model((images, ids))
-                print('outputs device:', outputs.device)
-                print('targets device:', targets.device)
                 loss = self.loss_fn(outputs, targets)
                 total_loss += loss.item()
 
