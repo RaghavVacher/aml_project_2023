@@ -88,10 +88,10 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         if self.id_list:
             (image_path, subject_id), output = self.data[idx]
-            image = Image.open(image_path)
+            image = np.load(image_path)
         else:
             image_path, output = self.data[idx]
-            image = Image.open(image_path)
+            image = np.load(image_path)
 
         if self.transform:
             image = self.transform(image)
