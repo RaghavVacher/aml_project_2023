@@ -7,13 +7,14 @@ import torch
 import os
 
 def load_images_from_folder(folder_path, start=None, end=None):
-    images = []
+    image_paths = []
     for filename in os.listdir(folder_path)[start:end]:
         img_path = os.path.join(folder_path, filename)
-        img_array = np.load(img_path)
+        # img_array = np.load(img_path)
         # .transpose((2, 0, 1))
-        images.append(img_array)
-    return images
+
+        image_paths.append(image_paths)
+    return image_paths
 
 def load_subject_data(subject, index_start=None, index_end=None, return_dict=False, include_subject_id = False):
     if(include_subject_id):
@@ -26,13 +27,13 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
     data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
     folder_path = path+"/training_images/"
-    image_data = load_images_from_folder(folder_path, index_start, index_end)
-    id_list = [subject for i in range(len(image_data))]
+    image_paths = load_images_from_folder(folder_path, index_start, index_end)
+    id_list = [subject for i in range(len(image_paths))]
     
     if include_subject_id:
-        return data_lh, data_rh, image_data, id_list
+        return data_lh, data_rh, image_paths, id_list
     else:
-        return data_lh, data_rh, image_data
+        return data_lh, data_rh, image_paths
 
 class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None, id_list=None):
@@ -52,7 +53,7 @@ class CustomDataset(Dataset):
 
         for i in range(self.num_samples):
             # Load image from the given list
-            image = Image.fromarray(images_list[i])
+            image = images_list[i]
 
             output = outputs_list[i]
            
@@ -86,9 +87,11 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.id_list:
-            (image, subject_id), output = self.data[idx]
+            (image_path, subject_id), output = self.data[idx]
+            image = Image.open(image_path)
         else:
-            image, output = self.data[idx]
+            image_path, output = self.data[idx]
+            image = Image.open(image_path)
 
         if self.transform:
             image = self.transform(image)
