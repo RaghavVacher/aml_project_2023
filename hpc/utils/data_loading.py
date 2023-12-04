@@ -13,7 +13,7 @@ def load_images_from_folder(folder_path, start=None, end=None):
         # img_array = np.load(img_path)
         # .transpose((2, 0, 1))
 
-        image_paths.append(image_paths)
+        image_paths.append(img_path)
     return image_paths
 
 def load_subject_data(subject, index_start=None, index_end=None, return_dict=False, include_subject_id = False):
