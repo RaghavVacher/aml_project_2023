@@ -34,6 +34,7 @@ parser.add_argument('epochs', type=int, help='Number of epochs')
 parser.add_argument('model', type=str, help='Chosen model')
 parser.add_argument('learning_rate', type=float, help='Learning rate')
 parser.add_argument('samples', type=str, help='Learning rate')
+parser.add_argument('batch_size', type=int, help='Batch size')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -43,6 +44,7 @@ print(f"Training for {args.epochs} epochs.")
 print(f"Using {args.model} as the model.")
 print(f"Using {args.learning_rate} as the learning rate.")
 print(f"Using {args.samples} samples per subject.")
+print(f"Using {args.batch_size} as the batch size.")
 
 #############
 
@@ -57,7 +59,7 @@ if (args.samples == 'all'):
 else:
     num_samples = int(args.samples) # Number of samples per subject (None - all samples)
 n_subjects = 8 # Number of subjects to train on
-batch_size = 16 # Batch size
+batch_size = args.batch_size # Batch size
 learning_rate = args.learning_rate # Learning rate
 feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
 optimizer = torch.optim.Adam
@@ -69,12 +71,12 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,n_subjects+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
+    pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
     ### TODO
-    lh = [fmri[:18978] for fmri in lh]
-    rh = [fmri[:20220] for fmri in rh]
+    # lh = [fmri[:18978] for fmri in lh]
+    # rh = [fmri[:20220] for fmri in rh]
     
-    brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
+    brain_concat.extend(pca_brain) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
 #Data Aug
@@ -84,7 +86,7 @@ transforms_image = transforms.Compose([
     transforms.Normalize(mean = [0.485,0.456,0.406],std = [0.229,0.224,0.225])
 ])
 # Create dataset with concatenated hemispheres
-dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms_image, PCA = PCA(n_components = n_components))
+dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms_image, PCA = None)
 print('\nDataset made up of ', len(dataset), 'truples? of data\n--------')
 print('Shape of 1st element:', dataset[0][0].shape)
 print('Type of 2nd element:', type(dataset[0][1]))
@@ -114,7 +116,9 @@ trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
 trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader)
 # define the name for trained model based on set parameters and date
 try:
-    model_name = f"trained_model_{args.model}_{args.learning_rate}_{args.samples}_{args.epochs}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
-    trainer.save(model_name)
+    os.makedirs('trained_models', exist_ok=True)
+    model_name = f"{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_BATCHSIZE_{args.batch_size}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+    trainer.save('trained_models/'+model_name)
 except:
-    trainer.save('trained_model.pt')
+    model_name = f"trained_model_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+    trainer.save(model_name)
