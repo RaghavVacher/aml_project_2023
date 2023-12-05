@@ -269,13 +269,14 @@ class Trainer:
         print(f"{mode} Loss: {avg_loss}")
         return avg_loss
     
-    def fitID(self, num_epochs, train_loader, val_loader=None, patience=5):
+    def fitID(self, num_epochs, train_loader, val_loader=None, patience=5, min_delta=0.0001):
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.patience = patience
         self.best_val_loss = float('inf')
         self.current_patience = 0
         self.epochs_without_improvement = 0
+        self.min_delta = min_delta
 
         for epoch in range(num_epochs):
             self.model.train()
@@ -303,7 +304,7 @@ class Trainer:
                 self.history['val_loss'].append(val_loss)
 
                 # Check for early stopping
-                if val_loss < self.best_val_loss:
+                if val_loss < self.best_val_loss - self.min_delta:
                     self.best_val_loss = val_loss
                     self.current_patience = 0
                 else:
