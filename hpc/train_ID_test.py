@@ -61,7 +61,10 @@ else:
 n_subjects = 8 # Number of subjects to train on
 batch_size = args.batch_size # Batch size
 learning_rate = args.learning_rate # Learning rate
-feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
+if(args.model == 'resnet18'):
+    feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
+elif(args.model == 'resnet34'):
+    feature_extractor = torch.load('utils/pretrained_resnet34.pt')
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 
