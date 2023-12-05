@@ -36,6 +36,7 @@ feature_extractor = torch.hub.load('utils', 'resnet18', source='local') # CNN to
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 patience = 5 # Number of epochs without improvement to wait before early stopping
+min_delta = 0.001 # Minimum change in loss to be considered an improvement
 
 # Create concatenated lists including X samples * 8 subjects
 brain_concat = []
@@ -80,5 +81,5 @@ trainer = model.Trainer()
 trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
 
 # Train model and save
-trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader, patience=patience)
+trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader, patience=patience, min_delta=min_delta)
 trainer.save('trained_model.pt')
