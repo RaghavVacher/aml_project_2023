@@ -133,8 +133,8 @@ train_loss = trainer.history['train_loss']
 val_loss = trainer.history['val_loss']
 
 # plot the loss over epochs
-plt.plot(val_loss, label='val_loss')
 plt.plot(train_loss, label='train_loss')
+plt.plot(val_loss, label='val_loss')
 
 # Add labels and title
 plt.xlabel('Epochs')
