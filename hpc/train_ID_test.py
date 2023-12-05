@@ -63,8 +63,8 @@ batch_size = args.batch_size # Batch size
 learning_rate = args.learning_rate # Learning rate
 if(args.model == 'resnet18'):
     feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
-elif(args.model == 'resnet34'):
-    feature_extractor = torch.load('utils/pretrained_resnet34.pt')
+else:
+    feature_extractor = torch.load('utils/pretrained_'+ args.model +'.pt')
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
 
@@ -125,3 +125,23 @@ try:
 except:
     model_name = f"trained_model_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
     trainer.save(model_name)
+
+# Access the history
+train_loss = trainer.history['train_loss']
+val_loss = trainer.history['val_loss']
+
+# plot the loss over epochs
+plt.plot(val_loss, label='val_loss')
+plt.plot(train_loss, label='train_loss')
+
+# Add labels and title
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} | {num_samples * n_subjects} N')
+plt.legend()
+
+# Ensure the directory exists
+os.makedirs('plots', exist_ok=True)
+
+# Save the plot as image
+plt.savefig(f'plots/loss_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.png')
