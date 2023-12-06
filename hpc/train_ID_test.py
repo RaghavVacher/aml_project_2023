@@ -139,7 +139,7 @@ plt.plot(val_loss, label='val_loss')
 # Add labels and title
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} | {num_samples * n_subjects} N')
+plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} | {args.samples}/subj')
 plt.legend()
 
 # Ensure the directory exists
