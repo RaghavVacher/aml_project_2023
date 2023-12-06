@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models import ResNet, AlexNet
 from tqdm import tqdm
 import torch.nn.functional as F
 import os
 import sys
+import matplotlib.pyplot as plt
 
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -106,23 +108,35 @@ class ResNet1HeadID(nn.Module):
             self.feature_extractor = feature_extractor
 
         # Get input size of head before removing it
-        in_features = self.feature_extractor.fc.in_features
+        # in_features = self.feature_extractor.fc.in_features
+        if isinstance(self.feature_extractor, ResNet):
+            in_features = self.feature_extractor.fc.in_features
+        elif isinstance(self.feature_extractor, AlexNet):
+            in_features = self.feature_extractor.classifier[6].in_features
+        else:
+            raise TypeError('Invalid feature_extractor type')
 
         # Remove the last fully connected layer (head)
         self.pretrained_model = torch.nn.Sequential(*(list(self.feature_extractor.children())[:-1]))
+
+        # Calculate output shape of pretrained model
+        dummy_input = torch.randn(1, 3, 224, 224)
+        output = self.pretrained_model(dummy_input)
+        output_shape = output.shape[1]
+        print(f'Output shape of pretrained model: {output_shape}') 
         
         # Add shared layer
-        self.shared = LinearSequentialModel(input_size = in_features, hidden_size=256)
+        self.shared = LinearSequentialModel(input_size = output_shape, hidden_size=256)
 
         # Add subject-specific layers
-        self.sub1 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub2 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub3 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub4 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub5 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub6 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub7 = LinearSequentialModel(input_size = in_features, hidden_size=256)
-        self.sub8 = LinearSequentialModel(input_size = in_features, hidden_size=256)
+        self.sub1 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub2 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub3 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub4 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub5 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub6 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub7 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub8 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
 
         # Combine shared and subject-specific layers
         self.head = nn.Linear(256, output_size)
@@ -140,6 +154,7 @@ class ResNet1HeadID(nn.Module):
 
         # Flatten the features
         flat_features = torch.flatten(features, 1)
+        print('Shape of flat features:', flat_features.shape)
 
         # Forward pass through the shared layer
         shared = self.shared(flat_features)
@@ -280,6 +295,7 @@ class Trainer:
         self.current_patience = 0
         self.epochs_without_improvement = 0
         self.min_delta = min_delta
+        figure_num = 0
 
         for epoch in range(num_epochs):
             self.model.train()
@@ -305,6 +321,29 @@ class Trainer:
             if self.val_loader is not None:
                 val_loss = self.evaluateID(self.val_loader, "Validation")
                 self.history['val_loss'].append(val_loss)
+
+                # Plot the loss
+                plt.plot(self.history['train_loss'], label='train_loss')
+                plt.plot(self.history['val_loss'], label='val_loss')
+                plt.xlabel('Epochs')
+                plt.ylabel('Loss')
+                plt.title('Loss over epochs')
+                plt.ylim(0, 300)
+                plt.legend()
+
+                # Save the plot as image, but if epoch is 1 and there already is any image, add number to name
+                # if epoch == 0 and not os.path.exists('plots/loss_plot.png'):
+                #     figure_num = ""
+                # elif epoch == 0 and os.path.exists('plots/loss_plot.png'):
+                #     figure_num = 1
+                # elif epoch == 0 and os.path.exists('plots/loss_plot1.png'):
+                #     figure_num = 2
+                # elif epoch == 0 and os.path.exists('plots/loss_plot2.png'):
+                #     figure_num = 3
+                plt.savefig(f'plots/loss_plot{str(figure_num)}.png')
+
+                # Clear the plot for the next epoch
+                plt.clf()
 
                 # Check for early stopping
                 if val_loss < self.best_val_loss:
