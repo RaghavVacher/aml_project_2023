@@ -66,6 +66,9 @@ class ResNet1HeadID(nn.Module):
             # Load specified model
             self.feature_extractor = feature_extractor
 
+        # Print model structure
+        print(self.feature_extractor)
+
         # Get input size of head before removing it
         # in_features = self.feature_extractor.fc.in_features
         if isinstance(self.feature_extractor, ResNet):
@@ -78,11 +81,14 @@ class ResNet1HeadID(nn.Module):
         # Remove the last fully connected layer (head)
         self.pretrained_model = torch.nn.Sequential(*(list(self.feature_extractor.children())[:-1]))
 
+        # Print model structure after removing the head
+        print(self.pretrained_model)
+
         # Calculate output shape of pretrained model
         dummy_input = torch.randn(1, 3, 224, 224)
         output = self.pretrained_model(dummy_input)
-        output_shape = output.shape[1]
-        print(f'Output shape of pretrained model: {output_shape}') 
+        output_shape = output.shape[1] * output.shape[2] * output.shape[3]
+        print(f'Output shape of the model after removing head: {output_shape}') 
         
         # Add shared layer
         self.shared = LinearSequentialModel(input_size = output_shape, hidden_size=256)
@@ -110,13 +116,16 @@ class ResNet1HeadID(nn.Module):
 
         # Forward pass through the pretrained ResNet18 model
         features = self.pretrained_model(images)
+        print(f'Shape after passing through pretrained_model: {features.shape}')  # Print the shape
 
         # Flatten the features
         flat_features = torch.flatten(features, 1)
-        print('Shape of flat features:', flat_features.shape)
-
+        print(f'Shape after flattening: {flat_features.shape}')  # Print the shape after flattening
+        
         # Forward pass through the shared layer
         shared = self.shared(flat_features)
+        shared_output_shape = self.shared.forward(flat_features).shape
+        print(f'Shape after passing through shared layer: {shared_output_shape}')
 
         # Forward pass through the subject-specific layers if subject ID is given
         if ids != None:
