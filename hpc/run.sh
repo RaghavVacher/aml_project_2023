@@ -30,7 +30,11 @@ echo "Batch size: $BATCH_SIZE"
 # sbatch --cpus-per-task=$1 --gres=gpu:$2 --time=$3  batch.sbatch $4 $5
 
 # Submit the job and capture the job ID
-JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME --mem-per-cpu=$MEMORY batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE | awk '{print $4}')
+if [ "$MEMORY" != "x" ]; then
+    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME --mem-per-cpu=$MEMORY batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE | awk '{print $4}')
+else
+    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE | awk '{print $4}')
+fi
 
 # Print a banner
 echo "===================================="
@@ -64,6 +68,11 @@ echo "===================================="
 tail -f job.$JOB_ID.out | while read LOGLINE
 do
     echo "${LOGLINE}"
+
+    if [[ "${LOGLINE}" == *"Epoch 2/20"* ]]; then
+        ./imgsync.sh
+    fi
+
     if [[ "${LOGLINE}" == *"Model and training history saved"* ]]; then
             echo "===================================="
             echo " Job $JOB_ID finished | $(date -d@$SECONDS -u +%H:%M:%S)/$TIME elapsed"
