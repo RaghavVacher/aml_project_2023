@@ -2,7 +2,7 @@ import sys
 import os
 
 # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from utils import data_loading, model_test as model
+from utils import data_loading, final_model as model
 import numpy as np
 from pathlib import Path
 from PIL import Image
@@ -97,13 +97,23 @@ print('Shape of 1st element:', dataset[0][0].shape)
 print('Type of 2nd element:', type(dataset[0][1]))
 print('Shape of 3rd element:', dataset[0][2].shape, '\n\n')
 
+# Create a list of indices from 0 to the length of the dataset
+indices = list(range(len(dataset)))
+
+# Shuffle the indices
+np.random.shuffle(indices)
+
 # Create a train and validation subset of variable dataset with torch
 train_size = int(0.89 * len(dataset))
 val_size = len(dataset) - train_size
 
+# Split the indices into train and validation sets
+train_indices = indices[:train_size]
+val_indices = indices[train_size:]
+
 # Use the CustomSubset class for the train and validation subsets
-train_dataset = data_loading.CustomSubset(dataset, range(0, train_size), ids_concat[:train_size])
-val_dataset = data_loading.CustomSubset(dataset, range(train_size, len(dataset)), ids_concat[train_size:])
+train_dataset = data_loading.CustomSubset(dataset, train_indices, ids_concat[train_indices])
+val_dataset = data_loading.CustomSubset(dataset, val_indices, ids_concat[val_indices])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
 train_sampler = data_loading.SubjectSampler(train_dataset)
