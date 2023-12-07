@@ -50,3 +50,8 @@ if __name__ == "__main__":
     predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features)
     print(predictions)
 
+    #Inverse transform of preds with frozen PCA models
+
+    #Somehow collect real fMRI & calculate correlation
+
+
