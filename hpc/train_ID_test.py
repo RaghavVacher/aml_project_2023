@@ -35,6 +35,7 @@ parser.add_argument('model', type=str, help='Chosen model')
 parser.add_argument('learning_rate', type=float, help='Learning rate')
 parser.add_argument('samples', type=str, help='Learning rate')
 parser.add_argument('batch_size', type=int, help='Batch size')
+parser.add_argument('patience', type=int, help='Patience')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -45,6 +46,7 @@ print(f"Using {args.model} as the model.")
 print(f"Using {args.learning_rate} as the learning rate.")
 print(f"Using {args.samples} samples per subject.")
 print(f"Using {args.batch_size} as the batch size.")
+print(f"Using {args.patience} as the patience.")
 
 #############
 
@@ -67,7 +69,7 @@ else:
     feature_extractor = torch.load('utils/pretrained_'+ args.model +'.pt')
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
-patience = 5 # Number of epochs without improvement to wait before early stopping
+patience = args.patience # Number of epochs without improvement to wait before early stopping
 min_delta = 0.001 # Minimum change in loss to be considered an improvement
 
 # Create concatenated lists including X samples * 8 subjects
@@ -112,6 +114,7 @@ train_indices = indices[:train_size]
 val_indices = indices[train_size:]
 
 # Use the CustomSubset class for the train and validation subsets
+ids_concat = np.array(ids_concat)
 train_dataset = data_loading.CustomSubset(dataset, train_indices, ids_concat[train_indices])
 val_dataset = data_loading.CustomSubset(dataset, val_indices, ids_concat[val_indices])
 
