@@ -84,6 +84,10 @@ class ResNet1HeadID(nn.Module):
         # Print model structure after removing the head
         print(self.pretrained_model)
 
+        ### FREEZE PRETRAINED
+        for param in self.pretrained_model.parameters():
+            param.requires_grad = False
+
         # Calculate output shape of pretrained model
         dummy_input = torch.randn(1, 3, 224, 224)
         output = self.pretrained_model(dummy_input)
@@ -213,7 +217,6 @@ class Trainer:
                 plt.xlabel('Epochs')
                 plt.ylabel('Loss')
                 plt.title('Loss over epochs')
-                plt.ylim(0, 300)
                 plt.legend()
 
                 # Save the plot as image, but if epoch is 1 and there already is any image, add number to name
