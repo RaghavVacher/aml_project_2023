@@ -12,6 +12,7 @@ hpc/data
 hpc/venv
 aml_venv/
 src/*.pt
+hpc/utils/plots
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -174,3 +175,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 data/.DS_Store
+.DS_Store
+

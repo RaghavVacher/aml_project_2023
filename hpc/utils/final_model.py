@@ -11,47 +11,6 @@ import matplotlib.pyplot as plt
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def get_pretrained_regression_model(output_size):
-    # Load the pretrained ResNet18 model
-    pretrained_model = torch.hub.load('utils', 'resnet18', source='local')
-    
-    # Modify the last fully connected layer for regression with custom output size
-    in_features = pretrained_model.fc.in_features
-    pretrained_model.fc = nn.Linear(in_features, output_size)
-    
-    return pretrained_model
-
-class ResNet2HeadModel(nn.Module):
-    def __init__(self, output_size):
-        super(ResNet2HeadModel, self).__init__()
-        
-        # Load the pretrained ResNet18 model
-        self.pretrained_model = models.resnet18(weights='DEFAULT')
-        # in_features = self.pretrained_model.avgpool.in_features
-        in_features = 512
-        self.pretrained_model = torch.nn.Sequential(*(list(self.pretrained_model.children())[:-1]))
-        
-        # Remove the last fully connected layer
-        # self.pretrained_model.fc = nn.Identity()
-        
-        # Add two new linear layers for regression with custom output size
-        # self.Adj_layer = nn.Linear(1, 512)
-        self.fc1 = nn.Linear(in_features, output_size)
-        self.fc2 = nn.Linear(in_features, output_size)
-
-    def forward(self, x):
-        # Forward pass through the pretrained ResNet18 model
-        x = self.pretrained_model(x)
-        # x = self.Adj_layer(x)
-        x = torch.flatten(x, 1)
-        # Forward pass through the first linear layer
-        output1 = self.fc1(x)
-    
-        # Forward pass through the second linear layer
-        output2 = self.fc2(x)
-        
-        return output1, output2
-
 class LinearSequentialModel(nn.Module):
     def __init__(self, input_size = 512, hidden_size=256):
         super(LinearSequentialModel, self).__init__()
@@ -107,6 +66,9 @@ class ResNet1HeadID(nn.Module):
             # Load specified model
             self.feature_extractor = feature_extractor
 
+        # Print model structure
+        print(self.feature_extractor)
+
         # Get input size of head before removing it
         # in_features = self.feature_extractor.fc.in_features
         if isinstance(self.feature_extractor, ResNet):
@@ -119,11 +81,18 @@ class ResNet1HeadID(nn.Module):
         # Remove the last fully connected layer (head)
         self.pretrained_model = torch.nn.Sequential(*(list(self.feature_extractor.children())[:-1]))
 
+        # Print model structure after removing the head
+        print(self.pretrained_model)
+
+        ### FREEZE PRETRAINED
+        for param in self.pretrained_model.parameters():
+            param.requires_grad = False
+
         # Calculate output shape of pretrained model
         dummy_input = torch.randn(1, 3, 224, 224)
         output = self.pretrained_model(dummy_input)
-        output_shape = output.shape[1]
-        print(f'Output shape of pretrained model: {output_shape}') 
+        output_shape = output.shape[1] * output.shape[2] * output.shape[3]
+        print(f'Output shape of the model after removing head: {output_shape}') 
         
         # Add shared layer
         self.shared = LinearSequentialModel(input_size = output_shape, hidden_size=256)
@@ -151,13 +120,16 @@ class ResNet1HeadID(nn.Module):
 
         # Forward pass through the pretrained ResNet18 model
         features = self.pretrained_model(images)
+        print(f'Shape after passing through pretrained_model: {features.shape}')  # Print the shape
 
         # Flatten the features
         flat_features = torch.flatten(features, 1)
-        print('Shape of flat features:', flat_features.shape)
-
+        print(f'Shape after flattening: {flat_features.shape}')  # Print the shape after flattening
+        
         # Forward pass through the shared layer
         shared = self.shared(flat_features)
+        shared_output_shape = self.shared.forward(flat_features).shape
+        print(f'Shape after passing through shared layer: {shared_output_shape}')
 
         # Forward pass through the subject-specific layers if subject ID is given
         if ids != None:
@@ -188,7 +160,7 @@ class ResNet1HeadID(nn.Module):
         output = self.head(combined)
 
         return output
-
+    
 class Trainer:
     def __init__(self):
         self.model = None
@@ -203,90 +175,7 @@ class Trainer:
         self.model = model
         self.optimizer = optimizer(self.model.parameters(), lr=learning_rate)
         self.loss_fn = loss_fn
-
-    def fit(self, num_epochs, train_loader, val_loader=None):
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-
-        for epoch in range(num_epochs):
-            self.model.train()
-            total_loss = 0.0
-            with tqdm(total=len(self.train_loader), desc=f"Epoch {epoch + 1}/{num_epochs}") as pbar:
-                for inputs, targets in self.train_loader:
-                    self.optimizer.zero_grad()
-                    outputs = self.model(inputs)
-                    loss = self.loss_fn(outputs, targets)
-                    loss.backward()
-                    self.optimizer.step()
-                    total_loss += loss.item()
-
-                    # Update the progress bar
-                    pbar.update(1)
-
-            avg_loss = total_loss / len(self.train_loader)
-            self.history['train_loss'].append(avg_loss)
-            print(f"> Training Loss: {avg_loss}")
-
-            if self.val_loader is not None:
-                val_loss = self.evaluate(self.val_loader, "Validation")
-                self.history['val_loss'].append(val_loss)
-
-    def evaluate(self, data_loader, mode="Test"):
-        self.model.eval()
-        total_loss = 0.0
-        with torch.no_grad():
-            for inputs, targets in data_loader:
-                outputs = self.model(inputs)
-                loss = self.loss_fn(outputs, targets)
-                total_loss += loss.item()
-
-        avg_loss = total_loss / len(data_loader)
-        print(f"> {mode} Loss: {avg_loss}")
-        return avg_loss
-    
-    def fit_dual_head(self, num_epochs, train_loader, val_loader=None):
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-
-        for epoch in range(num_epochs):
-            self.model.train()
-            total_loss = 0.0
-            for (inputs, targets_head1, targets_head2) in self.train_loader:
-                print('batch')
-                self.optimizer.zero_grad()
-                outputs_head1, outputs_head2 = self.model(inputs)
-                loss_head1 = self.loss_fn(outputs_head1, targets_head1)
-                loss_head2 = self.loss_fn(outputs_head2, targets_head2)
-                total_loss += (loss_head1 + loss_head2).item()
-
-                # You can choose to backpropagate on each head separately or sum the losses and backpropagate once.
-                (loss_head1 + loss_head2).backward()
-
-                self.optimizer.step()
-
-            avg_loss = total_loss / len(self.train_loader)
-            self.history['train_loss'].append(avg_loss)
-            print(f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss}")
-
-            if self.val_loader is not None:
-                val_loss = self.evaluate_dual_head(self.val_loader, "Validation")
-                self.history['val_loss'].append(val_loss)
-
-
-    def evaluate_dual_head(self, data_loader, mode="Test"):
-        self.model.eval()
-        total_loss = 0.0
-        with torch.no_grad():
-            for inputs, targets_head1, targets_head2 in data_loader:
-                outputs_head1, outputs_head2 = self.model(inputs)
-                loss_head1 = self.loss_fn(outputs_head1, targets_head1)
-                loss_head2 = self.loss_fn(outputs_head2, targets_head2)
-                total_loss += (loss_head1 + loss_head2).item()
-
-        avg_loss = total_loss / len(data_loader)
-        print(f"{mode} Loss: {avg_loss}")
-        return avg_loss
-    
+ 
     def fitID(self, num_epochs, train_loader, val_loader=None, patience=5, min_delta=0.0001):
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -328,7 +217,6 @@ class Trainer:
                 plt.xlabel('Epochs')
                 plt.ylabel('Loss')
                 plt.title('Loss over epochs')
-                plt.ylim(0, 300)
                 plt.legend()
 
                 # Save the plot as image, but if epoch is 1 and there already is any image, add number to name

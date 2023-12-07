@@ -2,7 +2,7 @@ import sys
 import os
 
 # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from utils import data_loading, model_test as model
+from utils import data_loading, final_model as model
 import numpy as np
 from pathlib import Path
 from PIL import Image
@@ -34,6 +34,8 @@ parser.add_argument('epochs', type=int, help='Number of epochs')
 parser.add_argument('model', type=str, help='Chosen model')
 parser.add_argument('learning_rate', type=float, help='Learning rate')
 parser.add_argument('samples', type=str, help='Learning rate')
+parser.add_argument('batch_size', type=int, help='Batch size')
+parser.add_argument('patience', type=int, help='Patience')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -43,6 +45,8 @@ print(f"Training for {args.epochs} epochs.")
 print(f"Using {args.model} as the model.")
 print(f"Using {args.learning_rate} as the learning rate.")
 print(f"Using {args.samples} samples per subject.")
+print(f"Using {args.batch_size} as the batch size.")
+print(f"Using {args.patience} as the patience.")
 
 #############
 
@@ -57,11 +61,16 @@ if (args.samples == 'all'):
 else:
     num_samples = int(args.samples) # Number of samples per subject (None - all samples)
 n_subjects = 8 # Number of subjects to train on
-batch_size = 16 # Batch size
+batch_size = args.batch_size # Batch size
 learning_rate = args.learning_rate # Learning rate
-feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
+if(args.model == 'resnet18'):
+    feature_extractor = torch.hub.load('utils', args.model, source='local') # CNN to use for feature extraction
+else:
+    feature_extractor = torch.load('utils/pretrained_'+ args.model +'.pt')
 optimizer = torch.optim.Adam
 loss = torch.nn.MSELoss()
+patience = args.patience # Number of epochs without improvement to wait before early stopping
+min_delta = 0.001 # Minimum change in loss to be considered an improvement
 
 # Create concatenated lists including X samples * 8 subjects
 brain_concat = []
@@ -69,12 +78,12 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,n_subjects+1):
-    lh, rh, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
+    pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
     ### TODO
-    lh = [fmri[:18978] for fmri in lh]
-    rh = [fmri[:20220] for fmri in rh]
+    # lh = [fmri[:18978] for fmri in lh]
+    # rh = [fmri[:20220] for fmri in rh]
     
-    brain_concat.extend(np.concatenate((lh, rh), axis=1)) ### investigate whether concat of lh and rh results in what we want
+    brain_concat.extend(pca_brain) ### investigate whether concat of lh and rh results in what we want
     images_concat += images
     ids_concat += id_list
 #Data Aug
@@ -84,19 +93,30 @@ transforms_image = transforms.Compose([
     transforms.Normalize(mean = [0.485,0.456,0.406],std = [0.229,0.224,0.225])
 ])
 # Create dataset with concatenated hemispheres
-dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms_image, PCA = PCA(n_components = n_components))
+dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms_image, PCA = None)
 print('\nDataset made up of ', len(dataset), 'truples? of data\n--------')
 print('Shape of 1st element:', dataset[0][0].shape)
 print('Type of 2nd element:', type(dataset[0][1]))
 print('Shape of 3rd element:', dataset[0][2].shape, '\n\n')
 
+# Create a list of indices from 0 to the length of the dataset
+indices = list(range(len(dataset)))
+
+# Shuffle the indices
+np.random.shuffle(indices)
+
 # Create a train and validation subset of variable dataset with torch
 train_size = int(0.89 * len(dataset))
 val_size = len(dataset) - train_size
 
+# Split the indices into train and validation sets
+train_indices = indices[:train_size]
+val_indices = indices[train_size:]
+
 # Use the CustomSubset class for the train and validation subsets
-train_dataset = data_loading.CustomSubset(dataset, range(0, train_size), ids_concat[:train_size])
-val_dataset = data_loading.CustomSubset(dataset, range(train_size, len(dataset)), ids_concat[train_size:])
+ids_concat = np.array(ids_concat)
+train_dataset = data_loading.CustomSubset(dataset, train_indices, ids_concat[train_indices])
+val_dataset = data_loading.CustomSubset(dataset, val_indices, ids_concat[val_indices])
 
 # Put train dataset into a loader with 2 batches and put test data in val loader
 train_sampler = data_loading.SubjectSampler(train_dataset)
@@ -111,10 +131,32 @@ trainer = model.Trainer()
 trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
 
 # Train model and save
-trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader)
+trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader, patience=patience, min_delta=min_delta)
 # define the name for trained model based on set parameters and date
 try:
-    model_name = f"trained_model_{args.model}_{args.learning_rate}_{args.samples}_{args.epochs}_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
-    trainer.save(model_name)
+    os.makedirs('trained_models', exist_ok=True)
+    model_name = f"{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_BATCHSIZE_{args.batch_size}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+    trainer.save('trained_models/'+model_name)
 except:
-    trainer.save('trained_model.pt')
+    model_name = f"trained_model_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+    trainer.save(model_name)
+
+# Access the history
+train_loss = trainer.history['train_loss']
+val_loss = trainer.history['val_loss']
+
+# plot the loss over epochs
+plt.plot(train_loss, label='train_loss')
+plt.plot(val_loss, label='val_loss')
+
+# Add labels and title
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} | {args.samples}/subj')
+plt.legend()
+
+# Ensure the directory exists
+os.makedirs('plots', exist_ok=True)
+
+# Save the plot as image
+plt.savefig(f'plots/loss_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.png')

@@ -24,16 +24,17 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
     current_proj_dir = os.getcwd().split('hpc')[0] + 'hpc'
     print('Current project directory: %s' % current_proj_dir)
     path = current_proj_dir + '/data/training_split/subj0' + str(subject)
-    data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
-    data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
+    # data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
+    # data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
+    pca_brain = np.load(path + '/training_fmri/pca_brain.npy')[index_start : index_end]
     folder_path = path+"/training_images/"
     image_paths = load_images_from_folder(folder_path, index_start, index_end)
     id_list = [subject for i in range(len(image_paths))]
     
     if include_subject_id:
-        return data_lh, data_rh, image_paths, id_list
+        return pca_brain, image_paths, id_list
     else:
-        return data_lh, data_rh, image_paths
+        return pca_brain, image_paths
 
 class CustomDataset(Dataset):
     def __init__(self, images_list, outputs_list, transform=None, PCA=None, id_list=None):
