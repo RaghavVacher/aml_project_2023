@@ -27,7 +27,6 @@ if __name__ == "__main__":
     checkpoint_path = r"C:\Users\rvacher\Downloads\trained_model.pt"
     output_size = 100
     feature_extractor = None
-    sub_module = False
     rand_image = torch.rand([1, 3, 224, 224])
 
     # Check if GPU is available and if not, use CPU
