@@ -12,6 +12,7 @@ hpc/data
 hpc/venv
 aml_venv/
 src/*.pt
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -175,3 +176,4 @@ cython_debug/
 #.idea/
 data/.DS_Store
 .DS_Store
+
