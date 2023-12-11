@@ -16,7 +16,7 @@ def load_images_from_folder(folder_path, start=None, end=None):
         image_paths.append(img_path)
     return image_paths
 
-def load_subject_data(subject, index_start=None, index_end=None, return_dict=False, include_subject_id = False):
+def load_subject_data(subject, index_start=None, index_end=None, return_dict=False, include_subject_id = False, pca_components=100):
     if(include_subject_id):
         print('\n\n----------------\nLoading subject data with subject ID', str(subject) + '...')
     else:
@@ -24,9 +24,19 @@ def load_subject_data(subject, index_start=None, index_end=None, return_dict=Fal
     current_proj_dir = os.getcwd().split('hpc')[0] + 'hpc'
     print('Current project directory: %s' % current_proj_dir)
     path = current_proj_dir + '/data/training_split/subj0' + str(subject)
-    # data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
-    # data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
-    pca_brain = np.load(path + '/training_fmri/pca_brain.npy')[index_start : index_end]
+    if pca_components == 0: #if no PCA, truncate longer fmri arrays
+        data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
+        data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
+        data_lh = [fmri[:18978] for fmri in data_lh]
+        data_rh = [fmri[:20220] for fmri in data_rh]
+        pca_brain = np.concatenate((data_lh, data_rh), axis = 1)
+        print('Shape of pca_brain: ', pca_brain.shape)
+    else:
+        if pca_components == 100:
+            pca_suffix = ""
+        else:
+            pca_suffix = "_" + str(pca_components)
+        pca_brain = np.load(path + f'/training_fmri/pca_brain{pca_suffix}.npy')[index_start : index_end]
     folder_path = path+"/training_images/"
     image_paths = load_images_from_folder(folder_path, index_start, index_end)
     id_list = [subject for i in range(len(image_paths))]

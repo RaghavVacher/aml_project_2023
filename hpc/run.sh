@@ -16,6 +16,8 @@ SAMPLES=${7:-all} # Default to X samples per subject if not provided
 MEMORY=${8:-10G} # Default to X samples per subject if not provided
 BATCH_SIZE=${9:-32} # Default to X samples per subject if not provided
 PATIENCE=${10:-5} # Default to patience
+PCA_COMPONENTS=${11:-100} # Default to PCA components
+SIMPLE_HEAD=${12:-False}
 
 echo "===================================="
 echo "Number of CPUs: $CPU"
@@ -28,13 +30,15 @@ echo "Samples per subject: $SAMPLES"
 echo "Memory per CPU: $MEMORY"
 echo "Batch size: $BATCH_SIZE"
 echo "Patience: $PATIENCE"
+echo "PCA components: $PCA_COMPONENTS"
+echo "Simple head: $SIMPLE_HEAD"
 # sbatch --cpus-per-task=$1 --gres=gpu:$2 --time=$3  batch.sbatch $4 $5
 
 # Submit the job and capture the job ID
 if [ "$MEMORY" != "x" ]; then
-    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME --mem-per-cpu=$MEMORY batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE $PATIENCE | awk '{print $4}')
+    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME --mem-per-cpu=$MEMORY batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE $PATIENCE $PCA_COMPONENTS $SIMPLE_HEAD | awk '{print $4}')
 else
-    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE $PATIENCE | awk '{print $4}')
+    JOB_ID=$(sbatch --cpus-per-task=$CPU --gres=gpu:$GPU --time=$TIME batch.sbatch $EPOCHS $MODEL $LR $SAMPLES $BATCH_SIZE $PATIENCE $PCA_COMPONENTS $SIMPLE_HEAD | awk '{print $4}')
 fi
 
 # Print a banner
