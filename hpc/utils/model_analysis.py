@@ -18,7 +18,7 @@ def load_images_from_folder(folder_path, start=None, end=None):
 #slightly adjusted load_subject_data func
 def load_subject_data(subject, index_start=None, index_end=None):
     current_proj_dir = os.getcwd().split('hpc')[0] + 'hpc'
-    path = '/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/subj0' + str(subject)
+    path = 'data/training_split/subj0' + str(subject)
     data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
     brain = np.concatenate((data_lh, data_rh), axis = 1)
