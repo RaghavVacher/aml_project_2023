@@ -16,18 +16,18 @@ for subject in range(1,8+1):
     del data_lh, data_rh
 
     #PCA
-    pca_brain = PCA(n_components=100)
+    pca_brain = PCA(n_components=1000)
     pca_brain.fit(brain)
     brain_transform = pca_brain.transform(brain)
 
     #save the PCA model
     os.makedirs('pca_models', exist_ok=True)
-    save_path = f'pca_models/pca_model_subj0{subject}.joblib'
+    save_path = f'pca_models/pca_model_1000_subj0{subject}.joblib'
     joblib.dump(pca_brain, save_path)
     print('saved PCA model to', save_path)
 
     #save transformed data
-    save_path = path + '/pca_brain.npy'
+    save_path = path + '/pca_brain_1000.npy'
     # check if brain_transform is a numpy array
     if type(brain_transform) is not np.ndarray:
         print('transformed data is not a numpy array, converting it to one')

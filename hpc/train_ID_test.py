@@ -36,6 +36,8 @@ parser.add_argument('learning_rate', type=float, help='Learning rate')
 parser.add_argument('samples', type=str, help='Learning rate')
 parser.add_argument('batch_size', type=int, help='Batch size')
 parser.add_argument('patience', type=int, help='Patience')
+parser.add_argument('pca_components', type=int, help='PCA Components')
+parser.add_argument('simple_head', type=bool, help='Simple head')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -47,6 +49,8 @@ print(f"Using {args.learning_rate} as the learning rate.")
 print(f"Using {args.samples} samples per subject.")
 print(f"Using {args.batch_size} as the batch size.")
 print(f"Using {args.patience} as the patience.")
+print(f"Using {args.pca_components} as the number of PCA components.")
+print(f"Using simple head: {args.simple_head}")
 
 #############
 
@@ -54,7 +58,7 @@ print(f"Using {args.patience} as the patience.")
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Parameters
-n_components = 100 # PCA components
+n_components = args.pca_components # PCA components
 num_epochs = args.epochs # Number of epochs to train
 if (args.samples == 'all'):
     num_samples = None # Number of samples per subject (None - all samples)
@@ -78,7 +82,7 @@ images_concat = []
 ids_concat = []
 
 for subj in range(1,n_subjects+1):
-    pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True)
+    pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True, pca_components=n_components)
     ### TODO
     # lh = [fmri[:18978] for fmri in lh]
     # rh = [fmri[:20220] for fmri in rh]
@@ -125,7 +129,9 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size,
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, sampler=val_sampler)
 
 # Initialize model and trainer
-reg_model = model.ResNet1HeadID(n_components, feature_extractor)
+if n_components == 0:
+    n_components = 39198
+reg_model = model.ResNet1HeadID(n_components, feature_extractor, simple_head=args.simple_head)
 reg_model.to(device)
 trainer = model.Trainer()
 trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
@@ -152,7 +158,7 @@ plt.plot(val_loss, label='val_loss')
 # Add labels and title
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} | {args.samples}/subj')
+plt.title(f'Loss ov. epochs | {args.model} | LR = {args.learning_rate} \n {args.samples}/subj | PCA = {args.pca_components} | Simple head={args.simple_head}')
 plt.legend()
 
 # Ensure the directory exists

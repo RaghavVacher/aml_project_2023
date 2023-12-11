@@ -16,4 +16,4 @@ source venv/bin/activate
 # Run the Python script
 # $1 - epochs
 # $2 - model
-python -u train_ID_test.py $1 $2 $3 $4 $5 $6
+python -u train_ID_test.py $1 $2 $3 $4 $5 $6 $7 $8

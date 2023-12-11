@@ -56,7 +56,7 @@ class LinearSequentialModel(nn.Module):
         return output
 
 class ResNet1HeadID(nn.Module):
-    def __init__(self, output_size, feature_extractor=None):
+    def __init__(self, output_size, feature_extractor=None, simple_head=False):
         super(ResNet1HeadID, self).__init__()
         
         if feature_extractor is None:
@@ -94,18 +94,23 @@ class ResNet1HeadID(nn.Module):
         output_shape = output.shape[1] * output.shape[2] * output.shape[3]
         print(f'Output shape of the model after removing head: {output_shape}') 
         
+        if not simple_head:
+            shared_and_subj_model = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        else:
+            shared_and_subj_model = nn.Linear(in_features=output_shape, out_features=256)
+
         # Add shared layer
-        self.shared = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.shared = shared_and_subj_model
 
         # Add subject-specific layers
-        self.sub1 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub2 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub3 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub4 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub5 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub6 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub7 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
-        self.sub8 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+        self.sub1 = shared_and_subj_model
+        self.sub2 = shared_and_subj_model
+        self.sub3 = shared_and_subj_model
+        self.sub4 = shared_and_subj_model
+        self.sub5 = shared_and_subj_model
+        self.sub6 = shared_and_subj_model
+        self.sub7 = shared_and_subj_model
+        self.sub8 = shared_and_subj_model
 
         # Combine shared and subject-specific layers
         self.head = nn.Linear(256, output_size)
@@ -120,16 +125,12 @@ class ResNet1HeadID(nn.Module):
 
         # Forward pass through the pretrained ResNet18 model
         features = self.pretrained_model(images)
-        print(f'Shape after passing through pretrained_model: {features.shape}')  # Print the shape
 
         # Flatten the features
         flat_features = torch.flatten(features, 1)
-        print(f'Shape after flattening: {flat_features.shape}')  # Print the shape after flattening
         
         # Forward pass through the shared layer
         shared = self.shared(flat_features)
-        shared_output_shape = self.shared.forward(flat_features).shape
-        print(f'Shape after passing through shared layer: {shared_output_shape}')
 
         # Forward pass through the subject-specific layers if subject ID is given
         if ids != None:
@@ -169,11 +170,11 @@ class Trainer:
         self.train_loader = None
         self.val_loader = None
         self.source = None
-        self.history = {'train_loss': [], 'val_loss': []}
+        self.history = {'train_loss': [], 'val_loss': [], 'train_loss_batch': [], 'val_loss_batch': []}
 
     def compile(self, model, optimizer, learning_rate, loss_fn):
         self.model = model
-        self.optimizer = optimizer(self.model.parameters(), lr=learning_rate)
+        self.optimizer = optimizer(self.model.parameters(), lr=learning_rate, weight_decay = 0.01)
         self.loss_fn = loss_fn
  
     def fitID(self, num_epochs, train_loader, val_loader=None, patience=5, min_delta=0.0001):
@@ -218,19 +219,7 @@ class Trainer:
                 plt.ylabel('Loss')
                 plt.title('Loss over epochs')
                 plt.legend()
-
-                # Save the plot as image, but if epoch is 1 and there already is any image, add number to name
-                # if epoch == 0 and not os.path.exists('plots/loss_plot.png'):
-                #     figure_num = ""
-                # elif epoch == 0 and os.path.exists('plots/loss_plot.png'):
-                #     figure_num = 1
-                # elif epoch == 0 and os.path.exists('plots/loss_plot1.png'):
-                #     figure_num = 2
-                # elif epoch == 0 and os.path.exists('plots/loss_plot2.png'):
-                #     figure_num = 3
                 plt.savefig(f'plots/loss_plot{str(figure_num)}.png')
-
-                # Clear the plot for the next epoch
                 plt.clf()
 
                 # Check for early stopping
