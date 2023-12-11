@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
 
@@ -22,6 +23,11 @@ def make_prediction(model, flattened_dict, in_feat_model):
         pred = model.head(adj_output)
         preds[key] = pred
     return preds
+
+def get_pca_model(subject):
+    sub = str(subject)
+    pca = np.load(f'../../data/training_split/subj0{sub}/training_fmri/pca_brain.npy')
+    return pca
 
 if __name__ == "__main__":
     checkpoint_path = r"C:\Users\rvacher\Downloads\trained_model.pt"
@@ -50,6 +56,8 @@ if __name__ == "__main__":
     print(predictions)
 
     #Inverse transform of preds with frozen PCA models
+    pca = get_pca_model()#add subj id
+    inverse_preds = pca.inverse_transform(predictions)
 
     #Somehow collect real fMRI & calculate correlation
 
