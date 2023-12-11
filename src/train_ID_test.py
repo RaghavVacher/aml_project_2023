@@ -1,3 +1,4 @@
+#%%
 import sys
 import os
 
@@ -22,13 +23,15 @@ from scipy.stats import pearsonr as corr
 from sklearn.decomposition import PCA
 import random
 
+#%%
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+#%%
 # Parameters
 n_components = 100 # PCA components
-num_epochs = 10 # Number of epochs to train
-n_subjects = 8 # Number of subjects to train on
+num_epochs = 2 # Number of epochs to train
+n_subjects = 2 # Number of subjects to train on
 num_samples = 100 # Number of samples per subject
 batch_size = 16 # Batch size
 learning_rate = 0.0001 # Learning rate
@@ -82,4 +85,7 @@ trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)
 
 # Train model and save
 trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_loader, patience=patience, min_delta=min_delta)
-trainer.save('trained_model.pt')
+# trainer.save('trained_model.pt')
+
+#%%
+output = reg_model(dataset[0][0].unsqueeze(0).to(device))
