@@ -28,12 +28,14 @@ def load_subject_data(subject, index_start=None, index_end=None):
     
     return brain, image_paths
 
+#For ResNet 
 def get_block_names(model):
     layer_names = []
     for layer_name, _ in model.named_children():
         layer_names.append(layer_name)
     return layer_names
 
+#For Aleknet
 def get_module_names(model):
     layer_names = []
     for layer_name, _ in model.named_modules():
@@ -69,24 +71,12 @@ def preprocess(img, size=224):
     ])
     return transform(img)
 
-#load images and original activations
-subject_id = 1
-brain, image_paths = load_subject_data(1, index_start=0, index_end=5)
-
-#pick random image and activation
-image = np.load(image_paths[0])
-image = preprocess(image)
-
-activation = torch.Tensor(brain[0,:])
-print('activation type:', type(activation))
-
-scores = {}
 
 if __name__ == "__main__":
     #Change as needed
     checkpoint_path = 'hpc/utils/trained_models/alexnet_LR0.00015_SAMPLES_200_EPOCHS100_BATCHSIZE_16_TIME_2023-12-07_23:18:19.pt'
     output_size = 100
-    feature_extractor = torch.hub.load('src/utils', 'alexnet', source = 'local')
+    backbone = 'alexnet'
     #load images and original activations
     subject_id = 1
     brain, image_paths = load_subject_data(1, index_start=0, index_end=5)
@@ -105,13 +95,17 @@ if __name__ == "__main__":
 
     #Load in model 
     trained_model_state_dict = torch.load(checkpoint_path, map_location = device)
+    feature_extractor = torch.hub.load('src/utils', backbone, source = 'local')
 
     trained_model = ResNet1HeadID(output_size = output_size, feature_extractor= feature_extractor).eval()
     trained_model.load_state_dict(trained_model_state_dict["model_state_dict"])
     trained_model_backbone = trained_model.feature_extractor
 
     #Create feature extractor
-    output_layer_names = get_module_names(trained_model_backbone)[1:-1]
+    if backbone == "alexnet":
+        output_layer_names = get_module_names(trained_model_backbone)[1:-1]
+    else:
+        output_layer_names = get_block_names(trained_model_backbone)[:-1]
     feature_extractor = create_feature_extractor(trained_model_backbone, output_layer_names)
 
     #Extract features & predict fMRI data 
@@ -132,10 +126,15 @@ if __name__ == "__main__":
         inversed_predictions[key] = preds
 
     #Somehow collect real fMRI & calculate correlation
-    for key in inversed_predictions:
-        preds = inversed_predictions[key]
-        mnnpc = MNNPC()
-        score = mnnpc(pred = preds, gt=activation)
-        scores[key] = score
 
-    print(scores)
+
+
+
+    #Caculating MNNPC on Preds
+    # for key in inversed_predictions:
+    #     preds = inversed_predictions[key]
+    #     mnnpc = MNNPC()
+    #     score = mnnpc(pred = preds, gt=activation)
+    #     scores[key] = score
+
+    # print(scores)
