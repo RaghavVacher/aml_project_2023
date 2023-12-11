@@ -1,10 +1,8 @@
 import torch
 import joblib
 import numpy as np
-#import os
 from final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
-from data_loading import load_subject_data
 from evaluation import MNNPC
 import torchvision.transforms as T
 import os
