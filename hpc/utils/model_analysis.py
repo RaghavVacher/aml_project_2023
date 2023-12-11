@@ -26,7 +26,7 @@ def make_prediction(model, flattened_dict, in_feat_model):
 
 def get_pca_model(subject):
     sub = str(subject)
-    pca = np.load(f'../../data/training_split/subj0{sub}/training_fmri/pca_brain.npy')
+    pca = np.load(f'pca_models/pca_model_subj0{sub}')
     return pca
 
 if __name__ == "__main__":
