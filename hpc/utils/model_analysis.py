@@ -1,4 +1,5 @@
 import torch
+import joblib
 import numpy as np
 from final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
@@ -26,12 +27,12 @@ def make_prediction(model, flattened_dict, in_feat_model):
 
 def get_pca_model(subject):
     sub = str(subject)
-    pca = np.load(f'pca_models/pca_model_subj0{sub}')
+    pca = joblib.load(f'hpc/utils/pca_models/pca_model_subj0{sub}.joblib')
     return pca
 
 if __name__ == "__main__":
     #Change as needed
-    checkpoint_path = r"C:\Users\rvacher\Downloads\trained_model.pt"
+    checkpoint_path = 'hpc/utils/trained_models/resnet101_LR0.001_SAMPLES_all_EPOCHS20_BATCHSIZE_64_TIME_2023-12-05_18:59:14.pt'
     output_size = 100
     feature_extractor = None
     subject_id = 2
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     trained_model_state_dict = torch.load(checkpoint_path, map_location = device)
 
     trained_model = ResNet1HeadID(output_size = output_size, feature_extractor= feature_extractor).eval()
-    trained_model.load_state_dict(trained_model_state_dict["model_state_dict"])
+    #trained_model.load_state_dict(trained_model_state_dict["model_state_dict"])
     trained_model_backbone = trained_model.feature_extractor
 
     #Create feature extractor 
@@ -57,10 +58,16 @@ if __name__ == "__main__":
     predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features)
     print(predictions)
 
-    #Inverse transform of preds with frozen PCA models
-    pca = get_pca_model(subject_id)
-    inverse_preds = pca.inverse_transform(predictions)
+#Inverse transform of preds with frozen PCA models
+pca = get_pca_model(subject_id)
+inversed_predictions = predictions.copy()
+for key in inversed_predictions:
+    #convert prediction tensors to np arrays to make it compatible for inverse pca
+    preds = inversed_predictions[key].detach().numpy()
+    # inverse-pca and store in new dict
+    inversed_predictions[key] = pca.inverse_transform(preds)
 
-    #Somehow collect real fMRI & calculate correlation
+#Somehow collect real fMRI & calculate correlation
+
 
 
