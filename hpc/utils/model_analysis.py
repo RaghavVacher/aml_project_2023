@@ -30,6 +30,7 @@ def get_pca_model(subject):
     return pca
 
 if __name__ == "__main__":
+    #Change as needed
     checkpoint_path = r"C:\Users\rvacher\Downloads\trained_model.pt"
     output_size = 100
     feature_extractor = None
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     print(predictions)
 
     #Inverse transform of preds with frozen PCA models
-    pca = get_pca_model(subject_id)#add subj id
+    pca = get_pca_model(subject_id)
     inverse_preds = pca.inverse_transform(predictions)
 
     #Somehow collect real fMRI & calculate correlation
