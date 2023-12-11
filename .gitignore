@@ -13,6 +13,7 @@ hpc/venv
 aml_venv/
 src/*.pt
 hpc/utils/plots
+hpc/utils/pca_models
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
