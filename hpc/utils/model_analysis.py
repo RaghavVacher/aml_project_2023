@@ -33,6 +33,7 @@ if __name__ == "__main__":
     checkpoint_path = r"C:\Users\rvacher\Downloads\trained_model.pt"
     output_size = 100
     feature_extractor = None
+    subject_id = 2
     rand_image = torch.rand([1, 3, 224, 224])
 
     # Check if GPU is available and if not, use CPU
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     print(predictions)
 
     #Inverse transform of preds with frozen PCA models
-    pca = get_pca_model()#add subj id
+    pca = get_pca_model(subject_id)#add subj id
     inverse_preds = pca.inverse_transform(predictions)
 
     #Somehow collect real fMRI & calculate correlation
