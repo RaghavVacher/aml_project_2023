@@ -4,7 +4,7 @@ import numpy as np
 #import os
 from final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
-from data_loading import load_subject_data, CustomDataset
+from data_loading import load_subject_data
 from evaluation import MNNPC
 import torchvision.transforms as T
 
@@ -58,7 +58,7 @@ scores = {}
 
 if __name__ == "__main__":
     #Change as needed
-    checkpoint_path = 'hpc/utils/trained_models/alexnet_LR0.00015_SAMPLES_200_EPOCHS100_BATCHSIZE_16_TIME_2023-12-07_23:18:19.pt'
+    checkpoint_path = 'hpc/utils/trained_models/resnet101_LR0.001_SAMPLES_all_EPOCHS20_BATCHSIZE_64_TIME_2023-12-05_18:59:14.pt'
     output_size = 100
     feature_extractor = None
     #rand_image = torch.rand([1, 3, 224, 224])
