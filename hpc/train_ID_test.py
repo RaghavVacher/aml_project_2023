@@ -37,7 +37,7 @@ parser.add_argument('samples', type=str, help='Learning rate')
 parser.add_argument('batch_size', type=int, help='Batch size')
 parser.add_argument('patience', type=int, help='Patience')
 parser.add_argument('pca_components', type=int, help='PCA Components')
-parser.add_argument('simple_head', type=bool, help='Simple head')
+parser.add_argument('simple_head', type=str, help='Simple head')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -131,7 +131,8 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, sam
 # Initialize model and trainer
 if n_components == 0:
     n_components = 39198
-reg_model = model.ResNet1HeadID(n_components, feature_extractor, simple_head=args.simple_head)
+simple_head_bool = args.simple_head == "True"
+reg_model = model.ResNet1HeadID(n_components, feature_extractor, simple_head=simple_head_bool)
 reg_model.to(device)
 trainer = model.Trainer()
 trainer.compile(reg_model, optimizer, learning_rate=learning_rate, loss_fn=loss)

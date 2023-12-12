@@ -5,7 +5,7 @@
 while true; do
     # Check if imgsync.png file exists
     echo 'trying rsync...'
-    rsync -avz -e "ssh -i '/Users/aleksygalkowski/Documents/Projects/ucph/social-data-science/2023 sem 3/aml-itu/aml_project_2023/hpc/utils/plots/id_rsa'" agac@hpc.itu.dk:/home/data_shares/fear_sds/hpc/plots/ "/Users/aleksygalkowski/Documents/Projects/ucph/social-data-science/2023 sem 3/aml-itu/aml_project_2023/hpc/utils/plots/"
+    rsync -avz -e "ssh -i '/Users/aleksygalkowski/Documents/Projects/ucph/social-data-science/2023 sem 3/aml-itu/aml_project_2023/hpc/utils/ssh'" agac@hpc.itu.dk:/home/data_shares/fear_sds/hpc/plots/ "/Users/aleksygalkowski/Documents/Projects/ucph/social-data-science/2023 sem 3/aml-itu/aml_project_2023/hpc/utils/plots/"
 
     # Sleep for X seconds
     sleep 5
