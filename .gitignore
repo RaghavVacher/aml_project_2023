@@ -179,3 +179,4 @@ data/.DS_Store
 
 hpc/utils/ssh
 .gitignore
+hpc/utils/ssh.pub
