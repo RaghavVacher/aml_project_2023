@@ -1,9 +1,9 @@
 import torch
 import joblib
 import numpy as np
-from final_model import ResNet1HeadID
+from utils.final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
-from evaluation import MNNPC
+from utils.evaluation import MNNPC
 import torchvision.transforms as T
 import os
 
@@ -47,10 +47,15 @@ def flatten_features(outputs):
         outputs[key] = item.flatten()
     return outputs
 
+
+
 def make_prediction(model, flattened_dict, in_feat_model, subject):
     preds = {}
     for key, item in flattened_dict.items():
         adj_layer = torch.nn.Linear(len(item), in_feat_model)
+        print('3. in_size of adj_layer', len(item))
+        print('4. out_size of adj_layer', in_feat_model)
+        print('5. in_size of shared layer', model.shared.in_features)
         adj_layer.requires_grad = False
         adj_output = adj_layer(item)
         shared = model.shared(adj_output)
@@ -92,12 +97,50 @@ def preprocess(img, size=224):
     ])
     return transform(img)
 
+def process_subject_data(data,subject, split=True):
+    subject = f'subj0{subject}'
+    # Define the split dictionary
+    split_dict = {"subj01": 19004, "subj02": 19004, "subj03": 19004, "subj04": 19004,
+                  "subj05": 19004, "subj06": 18978, "subj07": 19004, "subj08": 18981}
+
+
+    if subject not in split_dict.keys():
+        print("Invalid subject")
+        return None, None
+
+    # Split data based on the split dictionary
+    if split:
+        lh_data = data[:split_dict[subject]]
+        rh_data = data[split_dict[subject]:]
+    else:
+        lh_data = data
+        rh_data = None
+
+    # Read ROI directories
+    roi_dir_lh = np.load(fr"C:\Users\rvacher\Downloads\algonauts_2023_tutorial_data\{subject}\roi_masks\lh.all-vertices_fsaverage_space.npy")
+    if rh_data is not None:
+        roi_dir_rh = np.load(fr"C:\Users\rvacher\Downloads\algonauts_2023_tutorial_data\{subject}\roi_masks\rh.all-vertices_fsaverage_space.npy")
+    else:
+        roi_dir_rh = None
+
+    # Create responses
+    fsaverage_response_lh = np.zeros(len(roi_dir_lh))
+    fsaverage_response_lh[np.where(roi_dir_lh)[0]] = lh_data
+
+    if rh_data is not None:
+        fsaverage_response_rh = np.zeros(len(roi_dir_rh))
+        fsaverage_response_rh[np.where(roi_dir_rh)[0]] = rh_data
+    else:
+        fsaverage_response_rh = None
+
+    return fsaverage_response_lh, fsaverage_response_rh
+
 
 if __name__ == "__main__":
     #Change as needed
-    checkpoint_path = 'hpc/utils/trained_models/alexnet_LR0.00015_SAMPLES_200_EPOCHS100_BATCHSIZE_16_TIME_2023-12-07_23:18:19.pt'
+    checkpoint_path = 'hpc/utils/trained_models/resnet101_LR0.001_SAMPLES_all_EPOCHS20_BATCHSIZE_64_TIME_2023-12-05_18:59:14.pt'
     output_size = 100
-    backbone = 'alexnet'
+    backbone = 'resnet18'
     #load images and original activations
     subject_id = 1
     brain, image_paths = load_subject_data(1, index_start=0, index_end=5)
@@ -131,7 +174,9 @@ if __name__ == "__main__":
 
     #Extract features & predict fMRI data 
     outputs = feature_extractor(image.unsqueeze(0))
+    print('1. features extracted from image:', len(outputs), 'of type:', type(outputs))
     flat_outputs = flatten_features(outputs)
+    print('2. flattened features:', len(flat_outputs), 'of type:', type(flat_outputs))
     predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features, subject = subject_id)
     print(predictions)
 
@@ -146,11 +191,11 @@ if __name__ == "__main__":
         # inverse-pca and store in new dict
         inversed_predictions[key] = preds
 
-   #Caculating MNNPC on Preds
-    for key in inversed_predictions:
-        preds = inversed_predictions[key]
-        mnnpc = MNNPC()
-        score = mnnpc(pred = preds, gt=activation)
-        scores[key] = score
+    #Caculating MNNPC on Preds
+    # for key in inversed_predictions:
+    #     preds = inversed_predictions[key]
+    #     mnnpc = MNNPC()
+    #     score = mnnpc(pred = preds, gt=activation)
+    #     scores[key] = score
 
-    print(scores)
+    # print(scores)
