@@ -18,7 +18,7 @@ def load_images_from_folder(folder_path, start=None, end=None):
 #slightly adjusted load_subject_data func
 def load_subject_data(subject, index_start=None, index_end=None):
     current_proj_dir = os.getcwd().split('hpc')[0] + 'hpc'
-    path = 'data/training_split/subj0' + str(subject)
+    path = '/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/subj0' + str(subject)
     data_lh = np.load(path + '/training_fmri/lh_train_fmri.npy')[index_start : index_end]
     data_rh = np.load(path + '/training_fmri/rh_train_fmri.npy')[index_start : index_end]
     brain = np.concatenate((data_lh, data_rh), axis = 1)
@@ -47,13 +47,34 @@ def flatten_features(outputs):
         outputs[key] = item.flatten()
     return outputs
 
-def make_prediction(model, flattened_dict, in_feat_model):
+def make_prediction(model, flattened_dict, in_feat_model, subject):
     preds = {}
     for key, item in flattened_dict.items():
         adj_layer = torch.nn.Linear(len(item), in_feat_model)
         adj_layer.requires_grad = False
         adj_output = adj_layer(item)
-        pred = model.head(adj_output)
+        shared = model.shared(adj_output)
+        if subject == 1:
+            subject = model.sub1(adj_output)
+        elif subject == 2:
+            subject = model.sub2(adj_output)
+        elif subject == 3:
+            subject = model.sub3(adj_output)
+        elif subject == 4:
+            subject = model.sub4(adj_output)
+        elif subject == 5:
+            subject = model.sub5(adj_output)
+        elif subject == 6:
+            subject = model.sub6(adj_output)
+        elif subject == 7:
+            subject = model.sub7(adj_output)
+        elif subject == 8:
+            subject = model.sub8(adj_output)
+
+        # Average the shared and subject-specific layers
+        combined = (shared + subject) / 2
+        
+        pred = model.head(combined)
         preds[key] = pred
     return preds
 
@@ -111,7 +132,7 @@ if __name__ == "__main__":
     #Extract features & predict fMRI data 
     outputs = feature_extractor(image.unsqueeze(0))
     flat_outputs = flatten_features(outputs)
-    predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features)
+    predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features, subject = subject_id)
     print(predictions)
 
     #Inverse transform of preds with frozen PCA models
@@ -125,16 +146,11 @@ if __name__ == "__main__":
         # inverse-pca and store in new dict
         inversed_predictions[key] = preds
 
-    #Somehow collect real fMRI & calculate correlation
+   #Caculating MNNPC on Preds
+    for key in inversed_predictions:
+        preds = inversed_predictions[key]
+        mnnpc = MNNPC()
+        score = mnnpc(pred = preds, gt=activation)
+        scores[key] = score
 
-
-
-
-    #Caculating MNNPC on Preds
-    # for key in inversed_predictions:
-    #     preds = inversed_predictions[key]
-    #     mnnpc = MNNPC()
-    #     score = mnnpc(pred = preds, gt=activation)
-    #     scores[key] = score
-
-    # print(scores)
+    print(scores)
