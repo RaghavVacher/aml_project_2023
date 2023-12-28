@@ -171,13 +171,13 @@ def corr_roi_plot(gt_activation, pred_activation, subject, split = True):
         print("Invalid subject")
         return None, None
     
-    lh = gt_activation[:split_dict[subject]]
-    rh = gt_activation[split_dict[subject]:]
+    lh = gt_activation[:,:split_dict[subject]]
+    rh = gt_activation[:,split_dict[subject]:]
 
     # Split data based on the split dictionary
     if split:
-        lh_data_pred = pred_activation[:split_dict[subject]]
-        rh_data_pred = pred_activation[split_dict[subject]:]
+        lh_data_pred = pred_activation[:,:split_dict[subject]]
+        rh_data_pred = pred_activation[:,split_dict[subject]:]
 
     else:
         lh_data_pred = pred_activation
