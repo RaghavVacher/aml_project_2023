@@ -174,8 +174,8 @@ def corr_roi_plot(model, lh, rh, dataset, subject, split = True):
 
     # Split data based on the split dictionary
     if split:
-        lh_data_pred = full_brain_pred[:split_dict[subject]]
-        rh_data_pred = full_brain_pred[split_dict[subject]:]
+        lh_data_pred = full_brain_pred[:,:split_dict[subject]]
+        rh_data_pred = full_brain_pred[:,split_dict[subject]:]
     else:
         lh_data_pred = full_brain_pred
         rh_dataPred = None
