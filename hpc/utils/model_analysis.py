@@ -1,6 +1,9 @@
 import torch
 import joblib
 import numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
 from utils.final_model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
 from utils.evaluation import MNNPC
@@ -47,45 +50,53 @@ def flatten_features(outputs):
         outputs[key] = item.flatten()
     return outputs
 
-
-
-def make_prediction(model, flattened_dict, in_feat_model, subject):
+def make_prediction(model, flattened_dict, in_feat_model):
     preds = {}
     for key, item in flattened_dict.items():
         adj_layer = torch.nn.Linear(len(item), in_feat_model)
-        print('3. in_size of adj_layer', len(item))
-        print('4. out_size of adj_layer', in_feat_model)
-        print('5. in_size of shared layer', model.shared.in_features)
         adj_layer.requires_grad = False
         adj_output = adj_layer(item)
-        shared = model.shared(adj_output)
-        if subject == 1:
-            subject = model.sub1(adj_output)
-        elif subject == 2:
-            subject = model.sub2(adj_output)
-        elif subject == 3:
-            subject = model.sub3(adj_output)
-        elif subject == 4:
-            subject = model.sub4(adj_output)
-        elif subject == 5:
-            subject = model.sub5(adj_output)
-        elif subject == 6:
-            subject = model.sub6(adj_output)
-        elif subject == 7:
-            subject = model.sub7(adj_output)
-        elif subject == 8:
-            subject = model.sub8(adj_output)
-
-        # Average the shared and subject-specific layers
-        combined = (shared + subject) / 2
-        
-        pred = model.head(combined)
+        pred = model.head(adj_output)
         preds[key] = pred
     return preds
 
+# def make_prediction(model, flattened_dict, in_feat_model, subject):
+#     preds = {}
+#     for key, item in flattened_dict.items():
+#         adj_layer = torch.nn.Linear(len(item), in_feat_model)
+#         print('3. in_size of adj_layer', len(item))
+#         print('4. out_size of adj_layer', in_feat_model)
+#         print('5. in_size of shared layer', model.shared.in_features)
+#         adj_layer.requires_grad = False
+#         adj_output = adj_layer(item)
+#         shared = model.shared(adj_output)
+#         if subject == 1:
+#             subject = model.sub1(adj_output)
+#         elif subject == 2:
+#             subject = model.sub2(adj_output)
+#         elif subject == 3:
+#             subject = model.sub3(adj_output)
+#         elif subject == 4:
+#             subject = model.sub4(adj_output)
+#         elif subject == 5:
+#             subject = model.sub5(adj_output)
+#         elif subject == 6:
+#             subject = model.sub6(adj_output)
+#         elif subject == 7:
+#             subject = model.sub7(adj_output)
+#         elif subject == 8:
+#             subject = model.sub8(adj_output)
+
+#         # Average the shared and subject-specific layers
+#         combined = (shared + subject) / 2
+        
+#         pred = model.head(combined)
+#         preds[key] = pred
+#     return preds
+
 def get_pca_model(subject):
     sub = str(subject)
-    pca = joblib.load(f'hpc/utils/pca_models/pca_model_subj0{sub}.joblib')
+    pca = joblib.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/hpc/utils/pca_models/pca_model_subj01.joblib')
     return pca
 
 def preprocess(img, size=224):
@@ -117,9 +128,9 @@ def process_subject_data(data,subject, split=True):
         rh_data = None
 
     # Read ROI directories
-    roi_dir_lh = np.load(fr"C:\Users\rvacher\Downloads\algonauts_2023_tutorial_data\{subject}\roi_masks\lh.all-vertices_fsaverage_space.npy")
+    roi_dir_lh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/{subject}/roi_masks/lh.all-vertices_fsaverage_space.npy')
     if rh_data is not None:
-        roi_dir_rh = np.load(fr"C:\Users\rvacher\Downloads\algonauts_2023_tutorial_data\{subject}\roi_masks\rh.all-vertices_fsaverage_space.npy")
+        roi_dir_rh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/{subject}/roi_masks/rh.all-vertices_fsaverage_space.npy')
     else:
         roi_dir_rh = None
 
@@ -135,67 +146,111 @@ def process_subject_data(data,subject, split=True):
 
     return fsaverage_response_lh, fsaverage_response_rh
 
+def corr_roi_plot(model, lh, rh, dataset, subject, split = True):
+    subject = f'subj0{subject}'
+    working_dir = rf'C:\Users\rvacher\Downloads\algonauts_2023_tutorial_data\{subject}' #Change as needed
+    transform = T.Compose([
+                    T.ToTensor(), T.Resize((224, 224)),
+                    T.Normalize(mean=[0.485, 0.456, 0.406], 
+                    std=[0.229, 0.224, 0.225])])
 
-if __name__ == "__main__":
-    #Change as needed
-    checkpoint_path = 'hpc/utils/trained_models/resnet101_LR0.001_SAMPLES_all_EPOCHS20_BATCHSIZE_64_TIME_2023-12-05_18:59:14.pt'
-    output_size = 100
-    backbone = 'resnet18'
-    #load images and original activations
-    subject_id = 1
-    brain, image_paths = load_subject_data(1, index_start=0, index_end=5)
+    #logic for setting up the val dataset and remember to transform the dataset with the transform initialized above
+    dataset = dataset #this is hopefully a val or test dataset or else you're banned >:(
+    ## ADD
+    ## CODE
+    ## HERE
+    dataloader = [] # make this into the dataloader
 
-    #pick random image and activation
-    image = np.load(image_paths[0])
-    image = preprocess(image)
+    full_brain_pred = model(dataloader)
 
-    activation = torch.Tensor(brain[0,:])
-    print('activation type:', type(activation))
+    # Define the split dictionary
+    split_dict = {"subj01": 19004, "subj02": 19004, "subj03": 19004, "subj04": 19004,
+                  "subj05": 19004, "subj06": 18978, "subj07": 19004, "subj08": 18981}
 
-    scores = {}
 
-    # Check if GPU is available and if not, use CPU
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if subject not in split_dict.keys():
+        print("Invalid subject")
+        return None, None
 
-    #Load in model 
-    trained_model_state_dict = torch.load(checkpoint_path, map_location = device)
-    feature_extractor = torch.hub.load('src/utils', backbone, source = 'local')
-
-    trained_model = ResNet1HeadID(output_size = output_size, feature_extractor= feature_extractor).eval()
-    trained_model.load_state_dict(trained_model_state_dict["model_state_dict"])
-    trained_model_backbone = trained_model.feature_extractor
-
-    #Create feature extractor
-    if backbone == "alexnet":
-        output_layer_names = get_module_names(trained_model_backbone)[1:-1]
+    # Split data based on the split dictionary
+    if split:
+        lh_data_pred = full_brain_pred[:,:split_dict[subject]]
+        rh_data_pred = full_brain_pred[:,split_dict[subject]:]
     else:
-        output_layer_names = get_block_names(trained_model_backbone)[:-1]
-    feature_extractor = create_feature_extractor(trained_model_backbone, output_layer_names)
+        lh_data_pred = full_brain_pred
+        rh_dataPred = None
 
-    #Extract features & predict fMRI data 
-    outputs = feature_extractor(image.unsqueeze(0))
-    print('1. features extracted from image:', len(outputs), 'of type:', type(outputs))
-    flat_outputs = flatten_features(outputs)
-    print('2. flattened features:', len(flat_outputs), 'of type:', type(flat_outputs))
-    predictions = make_prediction(trained_model, flat_outputs, trained_model.head.in_features, subject = subject_id)
-    print(predictions)
+    # Empty correlated array
+    lh_correlation = np.zeros(lh.shape[1])
+    rh_correlation = np.zeros(rh.shape[1])
 
-    #Inverse transform of preds with frozen PCA models
-    pca = get_pca_model(subject_id)
-    inversed_predictions = predictions.copy()
-    for key in inversed_predictions:
-        #convert prediction tensors to np arrays to make it compatible for inverse pca
-        preds = inversed_predictions[key].detach().numpy()
-        preds = torch.Tensor(pca.inverse_transform(preds))
-        print('preds type:', type(preds))
-        # inverse-pca and store in new dict
-        inversed_predictions[key] = preds
+    # Correlate each predicted LH vertex with the corresponding ground truth vertex
+    for v in tqdm(range(lh.shape[1])):
+        lh_correlation[v] = pearsonr(lh_data_pred[:,v], lh[:,v])[0]
 
-    #Caculating MNNPC on Preds
-    # for key in inversed_predictions:
-    #     preds = inversed_predictions[key]
-    #     mnnpc = MNNPC()
-    #     score = mnnpc(pred = preds, gt=activation)
-    #     scores[key] = score
+    # Correlate each predicted RH vertex with the corresponding ground truth vertex
+    for v in tqdm(range(r.shape[1])):
+        rh_correlation[v] = pearsonr(rh_data_pred[:,v], rh[:,v])[0]
 
-    # print(scores)
+    # Load the ROI classes mapping dictionaries
+    roi_mapping_files = ['mapping_prf-visualrois.npy', 'mapping_floc-bodies.npy',
+        'mapping_floc-faces.npy', 'mapping_floc-places.npy',
+        'mapping_floc-words.npy', 'mapping_streams.npy']
+    roi_name_maps = []
+    for r in roi_mapping_files:
+        roi_name_maps.append(np.load(os.path.join(working_dir, 'roi_masks', r),
+            allow_pickle=True).item())
+
+    # Load the ROI brain surface maps
+    lh_challenge_roi_files = ['lh.prf-visualrois_challenge_space.npy',
+        'lh.floc-bodies_challenge_space.npy', 'lh.floc-faces_challenge_space.npy',
+        'lh.floc-places_challenge_space.npy', 'lh.floc-words_challenge_space.npy',
+        'lh.streams_challenge_space.npy']
+    rh_challenge_roi_files = ['rh.prf-visualrois_challenge_space.npy',
+        'rh.floc-bodies_challenge_space.npy', 'rh.floc-faces_challenge_space.npy',
+        'rh.floc-places_challenge_space.npy', 'rh.floc-words_challenge_space.npy',
+        'rh.streams_challenge_space.npy']
+    lh_challenge_rois = []
+    rh_challenge_rois = []
+    for r in range(len(lh_challenge_roi_files)):
+        lh_challenge_rois.append(np.load(os.path.join(working_dir, 'roi_masks',
+            lh_challenge_roi_files[r])))
+        rh_challenge_rois.append(np.load(os.path.join(working_dir, 'roi_masks',
+            rh_challenge_roi_files[r])))
+
+    # Select the correlation results vertices of each ROI
+    roi_names = []
+    lh_roi_correlation = []
+    rh_roi_correlation = []
+    for r1 in range(len(lh_challenge_rois)):
+        for r2 in roi_name_maps[r1].items():
+            if r2[0] != 0: # zeros indicate to vertices falling outside the ROI of interest
+                roi_names.append(r2[1])
+                lh_roi_idx = np.where(lh_challenge_rois[r1] == r2[0])[0]
+                rh_roi_idx = np.where(rh_challenge_rois[r1] == r2[0])[0]
+                lh_roi_correlation.append(lh_correlation[lh_roi_idx])
+                rh_roi_correlation.append(rh_correlation[rh_roi_idx])
+    roi_names.append('All vertices')
+    lh_roi_correlation.append(lh_correlation)
+    rh_roi_correlation.append(rh_correlation)
+
+    # Create the plot
+    lh_mean_roi_correlation = [np.mean(lh_roi_correlation[r])
+        for r in range(len(lh_roi_correlation))]
+    rh_mean_roi_correlation = [np.mean(rh_roi_correlation[r])
+        for r in range(len(rh_roi_correlation))]
+    plt.figure(figsize=(18,6))
+    x = np.arange(len(roi_names))
+    width = 0.30
+    plt.bar(x - width/2, lh_mean_roi_correlation, width, label='Left Hemisphere')
+    plt.bar(x + width/2, rh_mean_roi_correlation, width,
+        label='Right Hemishpere')
+    plt.xlim(left=min(x)-.5, right=max(x)+.5)
+    plt.ylim(bottom=0, top=1)
+    plt.xlabel('ROIs')
+    plt.xticks(ticks=x, labels=roi_names, rotation=60)
+    plt.ylabel('Mean Pearson\'s $r$')
+    plt.title(f'Encoding Accuracy of Individual ROIs for {subject}')
+    plt.legend(frameon=True, loc=1)
+    plt.show()
+    
