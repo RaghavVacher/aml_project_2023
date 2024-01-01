@@ -142,7 +142,7 @@ trainer.fitID(num_epochs=num_epochs, train_loader=train_loader, val_loader=val_l
 # define the name for trained model based on set parameters and date
 try:
     os.makedirs('trained_models', exist_ok=True)
-    model_name = f"{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_BATCHSIZE_{args.batch_size}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+    model_name = f"{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_SIMPLEHEAD_{args.simple_head}_EPOCHS{args.epochs}_BATCHSIZE_{args.batch_size}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
     trainer.save('trained_models/'+model_name)
 except:
     model_name = f"trained_model_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
@@ -166,4 +166,4 @@ plt.legend()
 os.makedirs('plots', exist_ok=True)
 
 # Save the plot as image
-plt.savefig(f'plots/loss_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.png')
+plt.savefig(f'plots/loss_{args.model}_LR{args.learning_rate}_SAMPLES_{args.samples}_SIMPLEHEAD_{args.simple_head}_EPOCHS{args.epochs}_TIME_{datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.png')

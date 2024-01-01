@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import os
 import sys
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # Check if GPU is available and if not, use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,7 +47,7 @@ class LinearSequentialModel(nn.Module):
             nn.ReLU(),
 
             # dropout
-            nn.Dropout(0.25)
+            nn.Dropout(0.5)
         )
 
     def forward(self, x):
@@ -231,6 +232,36 @@ class Trainer:
                     if self.current_patience >= self.patience:
                         print(f"Early stopping after {epoch + 1} epochs.")
                         break
+
+            ### save checkpoint of model and plot every 3 epochs
+
+            if (epoch + 1) % 3 == 0:
+                ### MODEL
+                try:
+                    os.makedirs('../trained_models', exist_ok=True)
+                    model_name = f"checkpoint_PCA_{len(outputs)}_SIMPLEHEAD_{self.simple_head}_SAMPLES_{len(self.data_loader.dataset)}_EPOCHS{num_epochs}_BATCHSIZE_{self.data_loader.batch_size}.pt"
+                    torch.save(self.model.state_dict(), '../trained_models/' + model_name)
+                    print(f'Checkpoint after epoch {epoch+1} saved successfully')
+                except Exception as e:
+                    print(f"Error saving checkpoint with name: {e}")
+                    model_name = f"checkpoint_TIME_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.pt"
+                    torch.save(self.model.state_dict(), '../trained_models/' + model_name)
+                    print('Unnamed checkpoint saved successfully')
+
+                
+                try:
+                    ### PLOT (twist)
+                    history = self.history
+                    # Plot the loss history
+                    plt.plot(history['train_loss'], label='Train Loss')
+                    plt.plot(history['val_loss'], label='Validation Loss')
+                    plt.xlabel('Epoch')
+                    plt.ylabel('Loss')
+                    plt.title('Training History')
+                    plt.legend()
+                    plt.savefig(f"../trained_models/checkpoint_PCA_{len(outputs)}_SIMPLEHEAD_{self.simple_head}_SAMPLES_{len(self.data_loader.dataset)}_EPOCHS{num_epochs}_BATCHSIZE_{self.data_loader.batch_size}.png")
+                except:
+                    print('Error generating plot')
 
     def evaluateID(self, data_loader, mode="Test"):
         self.model.eval()
