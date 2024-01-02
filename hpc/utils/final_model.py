@@ -96,22 +96,31 @@ class ResNet1HeadID(nn.Module):
         print(f'Output shape of the model after removing head: {output_shape}') 
         
         if not simple_head:
-            shared_and_subj_model = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            # Shared model
+            self.shared = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            
+            # Subject-specific models
+            self.sub1 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub2 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub3 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub4 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub5 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub6 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub7 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
+            self.sub8 = LinearSequentialModel(input_size = output_shape, hidden_size=256)
         else:
-            shared_and_subj_model = nn.Linear(in_features=output_shape, out_features=256)
-
-        # Add shared layer
-        self.shared = shared_and_subj_model
-
-        # Add subject-specific layers
-        self.sub1 = shared_and_subj_model
-        self.sub2 = shared_and_subj_model
-        self.sub3 = shared_and_subj_model
-        self.sub4 = shared_and_subj_model
-        self.sub5 = shared_and_subj_model
-        self.sub6 = shared_and_subj_model
-        self.sub7 = shared_and_subj_model
-        self.sub8 = shared_and_subj_model
+            # Shared layer
+            self.shared = nn.Linear(in_features=output_shape, out_features=256)
+            
+            # Subject-specific layers
+            self.sub1 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub2 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub3 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub4 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub5 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub6 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub7 = nn.Linear(in_features=output_shape, out_features=256)
+            self.sub8 = nn.Linear(in_features=output_shape, out_features=256)
 
         # Combine shared and subject-specific layers
         self.head = nn.Linear(256, output_size)
