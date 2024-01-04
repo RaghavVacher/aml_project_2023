@@ -94,9 +94,9 @@ def process_subject_data(data,subject, split=True):
         rh_data = None
 
     # Read ROI directories
-    roi_dir_lh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/{subject}/roi_masks/lh.all-vertices_fsaverage_space.npy')
+    roi_dir_lh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/test_split/{subject}/roi_masks/lh.all-vertices_fsaverage_space.npy')
     if rh_data is not None:
-        roi_dir_rh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/training_split/{subject}/roi_masks/rh.all-vertices_fsaverage_space.npy')
+        roi_dir_rh = np.load(f'/Users/emilykruger/Documents/GitHub/aml_project_2023/data/test_split/{subject}/roi_masks/rh.all-vertices_fsaverage_space.npy')
     else:
         roi_dir_rh = None
 
@@ -111,6 +111,15 @@ def process_subject_data(data,subject, split=True):
         fsaverage_response_rh = None
 
     return fsaverage_response_lh, fsaverage_response_rh
+
+def norm_pearson(gt_activation, pred_activation):
+    # Correlate each predicted LH vertex with the corresponding ground truth vertex
+    correlation = np.zeros(gt_activation.shape[1])
+    for v in tqdm(range(gt_activation.shape[1])):
+        correlation[v] = pearsonr(pred_activation[:,v], gt_activation[:,v])[0]
+    correlation = 1 - (correlation + 1) / 2
+    return np.mean(correlation)
+
 
 def corr_roi_plot(gt_activation, pred_activation, subject, split = True):
     subject = f'subj0{subject}'
