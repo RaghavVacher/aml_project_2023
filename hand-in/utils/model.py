@@ -6,7 +6,6 @@ from torchvision.models import ResNet, AlexNet
 from tqdm import tqdm
 import torch.nn.functional as F
 import os
-import sys
 import matplotlib.pyplot as plt
 from datetime import datetime
 

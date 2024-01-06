@@ -1,7 +1,6 @@
 #script to load and preprocess data so that it can be passed to train the model
-from torch.utils.data import Dataset, DataLoader, Sampler, Subset
+from torch.utils.data import Dataset, Sampler, Subset
 from sklearn.decomposition import PCA 
-from torchvision import transforms
 import numpy as np
 from PIL import Image
 import torch

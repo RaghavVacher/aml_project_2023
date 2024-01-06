@@ -2,11 +2,9 @@
 #we need to create our own test split
 import os
 import numpy as np
-import shutil
 import random
 from data_loading import load_subject_data
 from PIL import Image
-from tqdm import tqdm
 
 ### CREATE TEST SPLIT ###
 
