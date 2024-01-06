@@ -72,7 +72,6 @@ class ResNet1HeadID(nn.Module):
         print(self.feature_extractor)
 
         # Get input size of head before removing it
-        # in_features = self.feature_extractor.fc.in_features
         if isinstance(self.feature_extractor, ResNet):
             in_features = self.feature_extractor.fc.in_features
         elif isinstance(self.feature_extractor, AlexNet):
@@ -260,7 +259,7 @@ class Trainer:
 
                 
                 try:
-                    ### PLOT (twist)
+                    ### PLOT
                     history = self.history
                     # Plot the loss history
                     plt.plot(history['train_loss'], label='Train Loss')
