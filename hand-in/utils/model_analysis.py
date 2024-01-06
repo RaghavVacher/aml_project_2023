@@ -4,10 +4,9 @@
 import torch
 import joblib
 import numpy as np
-from utils.final_model import ResNet1HeadID
+from utils.model import ResNet1HeadID
 from torchvision.models.feature_extraction import create_feature_extractor
 import torch.nn.functional as F
-from utils.evaluation import MNNPC
 import torchvision.transforms as T
 import os
 import matplotlib.pyplot as plt
