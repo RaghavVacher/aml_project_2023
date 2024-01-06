@@ -151,7 +151,7 @@ def corr_roi_plot(gt_activation, pred_activation, subject, split = True):
     lh = gt_activation[:,:split_dict[subject]]
     rh = gt_activation[:,split_dict[subject]:]
 
-    # Empty correlated array
+    # Empty correlation array
     lh_correlation = np.zeros(lh.shape[1])
     rh_correlation = np.zeros(rh.shape[1])
 
@@ -197,7 +197,7 @@ def corr_roi_plot(gt_activation, pred_activation, subject, split = True):
     rh_roi_correlation = []
     for r1 in range(len(lh_challenge_rois)):
         for r2 in roi_name_maps[r1].items():
-            if r2[0] != 0: # zeros indicate to vertices falling outside the ROI of interest
+            if r2[0] != 0: # zeros indicate vertices falling outside the ROI of interest
                 roi_names.append(r2[1])
                 lh_roi_idx = np.where(lh_challenge_rois[r1] == r2[0])[0]
                 rh_roi_idx = np.where(rh_challenge_rois[r1] == r2[0])[0]
@@ -248,7 +248,7 @@ def corr_roi_plot_allsub(subject_list, model, split = True):
         lh = gt_activation[:,:split_dict[subject_id]]
         rh = gt_activation[:,split_dict[subject_id]:]
 
-            #pick image and activation
+        #pick image and activation
         images = []
         for i in range(len(image_paths)):
             image = np.load(image_paths[i])
@@ -322,7 +322,7 @@ def corr_roi_plot_allsub(subject_list, model, split = True):
         rh_roi_correlation = []
         for r1 in range(len(lh_challenge_rois)):
             for r2 in roi_name_maps[r1].items():
-                if r2[0] != 0: # zeros indicate to vertices falling outside the ROI of interest
+                if r2[0] != 0: # zeros indicate vertices falling outside the ROI of interest
                     roi_names.append(r2[1])
                     lh_roi_idx = np.where(lh_challenge_rois[r1] == r2[0])[0]
                     rh_roi_idx = np.where(rh_challenge_rois[r1] == r2[0])[0]
@@ -371,28 +371,28 @@ def corr_roi_plot_allsub(subject_list, model, split = True):
 
 #based in part on Algonauts 2023 Challenge tutorial notebook
 def corr_roi_plot_allsub_layers(subject_list, first_image_id, last_image_id, model, feature_extractor, split = True):
-    # Subject 1
+    #define dict to store correlation values for each subject and hemisphere
     dict_1_lh = {}
     dict_1_rh = {}
-    # Subject 2
+
     dict_2_lh = {}
     dict_2_rh = {}
-    # Subject 3
+
     dict_3_lh = {}
     dict_3_rh = {}
-    # Subject 4
+
     dict_4_lh = {}
     dict_4_rh = {}
-    # Subject 5
+
     dict_5_lh = {}
     dict_5_rh = {}
-    # Subject 6
+
     dict_6_lh = {}
     dict_6_rh = {}
-    # Subject 7
+
     dict_7_lh = {}
     dict_7_rh = {}
-    # Subject 8
+
     dict_8_lh = {}
     dict_8_rh = {}
 
