@@ -29,7 +29,6 @@ parser.add_argument('simple_head', type=str, help='Simple head')
 # Parse the arguments
 args = parser.parse_args()
 
-# Now you can use args.gpu and args.epochs in your script
 print(f"Training for {args.epochs} epochs.")
 print(f"Using {args.model} as the model.")
 print(f"Using {args.learning_rate} as the learning rate.")
@@ -70,7 +69,7 @@ ids_concat = []
 
 for subj in range(1,n_subjects+1):
     pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True, pca_components=n_components)
-    ### TODO
+    
     # lh = [fmri[:18978] for fmri in lh]
     # rh = [fmri[:20220] for fmri in rh]
     
