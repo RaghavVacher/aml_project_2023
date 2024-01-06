@@ -5,8 +5,6 @@ import os
 import data_loading, model
 import numpy as np
 from matplotlib import pyplot as plt
-from nilearn import datasets
-from nilearn import plotting
 import torch
 from torchvision import transforms
 import argparse
