@@ -2,7 +2,7 @@
 import os
 
 # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import data_loading, model
+from utils import data_loading, model
 import numpy as np
 from matplotlib import pyplot as plt
 import torch
