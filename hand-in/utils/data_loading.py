@@ -10,9 +10,6 @@ def load_images_from_folder(folder_path, start=None, end=None):
     image_paths = []
     for filename in os.listdir(folder_path)[start:end]:
         img_path = os.path.join(folder_path, filename)
-        # img_array = np.load(img_path)
-        # .transpose((2, 0, 1))
-
         image_paths.append(img_path)
     return image_paths
 
@@ -87,12 +84,6 @@ class CustomDataset(Dataset):
     def give_output(self):
         return self.output
 
-    # def internal_PCA(self):
-    #     if self.PCA:
-    #         return self.PCA
-    #     else:
-    #         print(f'PCA is {self.PCA}')
-
     def __len__(self):
         return self.num_samples
 
@@ -111,8 +102,6 @@ class CustomDataset(Dataset):
             output = self.PCA.transform(output.reshape(1, -1))
         else:
             output = output.reshape(1, -1)
-
-        ### Subject ID could be transformed, too?
 
         if self.id_list:
             return image, subject_id, torch.FloatTensor(output[0])
