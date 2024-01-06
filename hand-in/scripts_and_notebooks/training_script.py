@@ -70,18 +70,17 @@ ids_concat = []
 for subj in range(1,n_subjects+1):
     pca_brain, images, id_list  = data_loading.load_subject_data(subj, 0, num_samples, include_subject_id=True, pca_components=n_components)
     
-    # lh = [fmri[:18978] for fmri in lh]
-    # rh = [fmri[:20220] for fmri in rh]
-    
-    brain_concat.extend(pca_brain) ### investigate whether concat of lh and rh results in what we want
+    brain_concat.extend(pca_brain)
     images_concat += images
     ids_concat += id_list
-#Data Aug
+
+# Data Aug
 transforms_image = transforms.Compose([
     transforms.ToTensor(),
     transforms.Resize((224,224), antialias=True),
     transforms.Normalize(mean = [0.485,0.456,0.406],std = [0.229,0.224,0.225])
 ])
+
 # Create dataset with concatenated hemispheres
 dataset = data_loading.CustomDataset(images_list = images_concat, outputs_list = brain_concat, id_list = ids_concat, transform=transforms_image, PCA = None)
 print('\nDataset made up of ', len(dataset), 'truples? of data\n--------')
