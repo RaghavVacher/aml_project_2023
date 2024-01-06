@@ -1,27 +1,14 @@
 #training script
-import sys
 import os
 
 # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import data_loading, model
 import numpy as np
-from pathlib import Path
-from PIL import Image
-from tqdm import tqdm
-import matplotlib
 from matplotlib import pyplot as plt
 from nilearn import datasets
 from nilearn import plotting
 import torch
-from torch.utils.data import DataLoader, Dataset, SubsetRandomSampler
-from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
-import torchvision.models as models
 from torchvision import transforms
-from sklearn.decomposition import IncrementalPCA
-from sklearn.linear_model import LinearRegression
-from scipy.stats import pearsonr as corr
-from sklearn.decomposition import PCA
-import random
 import argparse
 from datetime import datetime
 
