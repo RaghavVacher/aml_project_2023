@@ -1,4 +1,5 @@
 #script to run descriptive stats on our data
+#unfortunately, we could not run this script as we ran out of RAM even on hpc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
