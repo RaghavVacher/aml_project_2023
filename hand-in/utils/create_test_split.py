@@ -9,7 +9,7 @@ from PIL import Image
 ### CREATE TEST SPLIT ###
 
 # For each subject
-for subject in range(1, 9):  # Assuming subjects are numbered from 1 to 8
+for subject in range(1, 9):
     # Load the data
     data_lh, data_rh, image_data, id_list = load_subject_data(subject, None, None, return_dict=False, include_subject_id=True)
 
