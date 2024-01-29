@@ -1,5 +1,5 @@
 # Project Context
-This project was conducted as a Group Exam Assignment for the Course Advanced Machine Learning at the IT University of Copenhagen in the Fall Semester 2023. The Project was graded 10 (B). The main branh contains the submitted exam material.
+This project was conducted as a Group Exam Assignment for the Course Advanced Machine Learning at the IT University of Copenhagen in the Fall Semester 2023. The Project was graded 10 (B). The main branch contains the submitted exam material.
 
 Equal Contributors are:
 Frederik Bredgaard: [@Fred-Bred](https://github.com/Fred-Bred)
