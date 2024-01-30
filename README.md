@@ -9,7 +9,7 @@ Aleksy Gałkowsk ([@Alexiejow](https://github.com/Alexiejow))
 
 Raghav Vacher ([@RaghavVacher](https://github.com/RaghavVacher))
 
-Emily Krüger ([@emilykruger](/https://github.com/emilykruger))
+Emily Krüger ([@krugeremily](/https://github.com/krugeremily))
 
 # Project Description
 
